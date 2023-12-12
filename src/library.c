@@ -85,5 +85,29 @@ int sc_regGet(int reg, int* value)
 
 int sc_commandEncode(int command, int operand, int* value)
 {
-    
+    if (command != (READ || WRITE || LOAD || STORE)
+       || !(command >= ADD && command <= MUL)
+       || !(command >= JUMP && command <= HALT)
+       || !(command >= NOT && command <= SUBCC)
+       || (operand < 0 || operand > 127)) return 1;
+
+    *value = (command << 7) | operand;
+    return 0;
+}
+
+int sc_commandDecode(int value, int* command, int* operand)
+{
+    int temp_command = value >> 7;
+    int temp_operand = value & 127;
+
+    if (temp_command != (READ || WRITE || LOAD || STORE)
+       || !(temp_command >= ADD && temp_command <= MUL)
+       || !(temp_command >= JUMP && temp_command <= HALT)
+       || !(temp_command >= NOT && temp_command <= SUBCC)
+       || (temp_operand < 0 || temp_operand > 127)) return 1;
+
+    *command = temp_command;
+    *operand = temp_operand; 
+
+    return 0;
 }
