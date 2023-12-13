@@ -1,5 +1,5 @@
-#ifndef LIBRARY_H_
-#define LIBRARY_H_
+#ifndef LIBRARY_H
+#define LIBRARY_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,9 +59,11 @@
 
 short registr = 0;
 int sc_memory[MEMORY_SIZE];
+//файл для загрузки/записи содержимого памяти
+char filename[15] = "sc_memory_file";
 
 int sc_memoryInit();
-int sc_memorySet(int address, int value);
+int sc_memorySet(int, int);
 int sc_memoryGet(int address, int* value);
 int sc_memorySave(char* filename);
 int sc_memoryLoad(char* filename);
@@ -70,6 +72,5 @@ int sc_regSet(int reg, int value);
 int sc_regGet(int reg, int* value);
 int sc_commandEncode(int command, int operand, int* value);
 int sc_commandDecode(int value, int* command, int* operand);
-
 
 #endif

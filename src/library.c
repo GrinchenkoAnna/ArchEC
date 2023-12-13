@@ -1,13 +1,12 @@
 #include "library.h"
 
-
-
 int sc_memoryInit()
 {
     for (int i = 0; i < MEMORY_SIZE; i++)
     {
         sc_memory[i] = 0;
     }
+    return 0;
 }
 
 int sc_memorySet(int address, int value)
@@ -46,7 +45,7 @@ int sc_memorySave(char* filename)
 int sc_memoryLoad(char* filename)
 {
     FILE *sc_memory_file;
-    if (sc_memory_file = fopen(filename, "rb") == NULL) return 1;
+    if ((sc_memory_file = fopen(filename, "rb")) == NULL) return 1;
     else 
     {
         fread(sc_memory, sizeof(int), MEMORY_SIZE, sc_memory_file);
