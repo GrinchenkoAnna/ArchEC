@@ -60,7 +60,7 @@
 short registr = 0;
 int sc_memory[MEMORY_SIZE];
 //файл для загрузки/записи содержимого памяти
-char filename[15] = "sc_memory_file";
+char filename[] = "src/sc_memory_file.txt";
 
 int sc_memoryInit();
 int sc_memorySet(int, int);
