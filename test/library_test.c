@@ -30,8 +30,7 @@ CTEST(LIBRARY, memorySetFAIL) //sc_memory[101] == 1
 CTEST(LIBRARY, memoryGetOK_1) //sc_memory[2] == 1
 {    
     int value;
-    int *p = &value;
-    int result = sc_memoryGet(2, p); //1    
+    int result = sc_memoryGet(2, &value); //1    
     const int expected = 1;  
     ASSERT_EQUAL(expected, result);
 }
@@ -39,8 +38,7 @@ CTEST(LIBRARY, memoryGetOK_1) //sc_memory[2] == 1
 CTEST(LIBRARY, memoryGetOK_2) //sc_memory[1] == 0
 {    
     int value;
-    int *p = &value;
-    int result = sc_memoryGet(1, p); //0 
+    int result = sc_memoryGet(1, &value); //0 
     const int expected = 0;  
     ASSERT_EQUAL(expected, result);
 }
@@ -48,8 +46,7 @@ CTEST(LIBRARY, memoryGetOK_2) //sc_memory[1] == 0
 CTEST(LIBRARY, memoryGetFAIL) //sc_memory[101] == 1
 {
     int value;
-    int *p = &value;
-    int result = sc_memoryGet(-2, p); //error  
+    int result = sc_memoryGet(-2, &value); //error  
     const int expected = 2;  
     ASSERT_EQUAL(expected, result);
 }
@@ -139,8 +136,7 @@ CTEST(LIBRARY, regGetOK_2) //getflag
     sc_regSet(MEMORY_ERROR, 0);
 
     int value;
-    int *p = &value;
-    int result = sc_memoryGet(MEMORY_ERROR, p); //0
+    int result = sc_memoryGet(MEMORY_ERROR, &value); //0
 
     const int expected = 0;  
     ASSERT_EQUAL(expected, result);
@@ -149,8 +145,7 @@ CTEST(LIBRARY, regGetOK_2) //getflag
 CTEST(LIBRARY, regGetFAIL) //getflag
 {       
     int value;
-    int *p = &value;
-    int result = sc_memoryGet(8, p); //error
+    int result = sc_memoryGet(8, &value); //error
 
     const int expected = 0;  
     ASSERT_EQUAL(expected, result);
@@ -158,9 +153,8 @@ CTEST(LIBRARY, regGetFAIL) //getflag
 
 CTEST(LIBRARY, commandEncodeOK) 
 {   
-    int value;
-    int *p = &value;    
-    int result = sc_commandEncode(10, 10, p); //1290
+    int value; 
+    int result = sc_commandEncode(10, 10, &value); //1290
 
     const int expected = 1290;  
     ASSERT_EQUAL(expected, result);
@@ -168,9 +162,8 @@ CTEST(LIBRARY, commandEncodeOK)
 
 CTEST(LIBRARY, commandEncodeFAIL_1) 
 {   
-    int value;
-    int *p = &value;    
-    int result = sc_commandEncode(1, 10, p); //2
+    int value; 
+    int result = sc_commandEncode(1, 10, &value); //2
 
     const int expected = 2;  
     ASSERT_EQUAL(expected, result);
@@ -178,9 +171,8 @@ CTEST(LIBRARY, commandEncodeFAIL_1)
 
 CTEST(LIBRARY, commandEncodeFAIL_2) 
 {   
-    int value;
-    int *p = &value;    
-    int result = sc_commandEncode(10, 200, p); //2
+    int value; 
+    int result = sc_commandEncode(10, 200, &value); //2
 
     const int expected = 2;  
     ASSERT_EQUAL(expected, result);
@@ -188,9 +180,8 @@ CTEST(LIBRARY, commandEncodeFAIL_2)
 
 CTEST(LIBRARY, commandEncodeFAIL_3) 
 {   
-    int value;
-    int *p = &value;    
-    int result = sc_commandEncode(-2, 200, p); //2
+    int value; 
+    int result = sc_commandEncode(-2, 200, &value); //2
 
     const int expected = 2;  
     ASSERT_EQUAL(expected, result);
@@ -198,10 +189,8 @@ CTEST(LIBRARY, commandEncodeFAIL_3)
 
 CTEST(LIBRARY, commandDecodeOK) 
 {   
-    int value1, value2;
-    int *command = &value1;
-    int *operand = &value2;
-    int result = sc_commandDecode(1290, command, operand); 
+    int command, operand;
+    int result = sc_commandDecode(1290, &command, &operand); 
 
     const int expected = 0;  
     ASSERT_EQUAL(expected, result);
@@ -209,10 +198,8 @@ CTEST(LIBRARY, commandDecodeOK)
 
 CTEST(LIBRARY, commandDecodeFAIL) 
 {   
-    int value1, value2;
-    int *command = &value1;
-    int *operand = &value2;
-    int result = sc_commandDecode(0, command, operand); //1
+    int command, operand;
+    int result = sc_commandDecode(0, &command, &operand); //1
 
     const int expected = 1;  
     ASSERT_EQUAL(expected, result);

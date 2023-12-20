@@ -10,6 +10,12 @@
     "files.associations": {
         "functional": "c",
         "library.h": "c",
-        "ctest.h": "c"
+        "ctest.h": "c",
+        "system_error": "c",
+        "array": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "ioctl.h": "c"
     }
 }

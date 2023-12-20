@@ -12,28 +12,45 @@ DIR_BIN = ./bin/
 LIBRARY = $(DIR_OBJ)library.a
 LIBRARY_TEST = $(DIR_BIN)library_test
 
-.PHONY: all clean
+MYTERM = $(DIR_OBJ)myTerm.a
+MYTERM_TEST = $(DIR_BIN)myTerm_test
 
-all: $(LIBRARY)
+.PHONY: all library myterm clean clean-test clean-all test
+
+all: library myterm 
+library: $(LIBRARY)
+myterm: $(MYTERM)
 clean: 
-	rm -rf $(LIBRARY) $(DIR_OBJ)*.o 
+	rm -rf $(LIBRARY) $(MYTERM) $(DIR_OBJ)*.o 
 clean-test:
-	rm -rf $(LIBRARY_TEST) $(DIR_TEST_OBJ)*.o
+	rm -rf $(LIBRARY_TEST) $(MYTERM_TEST) $(DIR_TEST_OBJ)*.o $(DIR_TEMP)
 clean-all:
-	rm -rf $(LIBRARY) $(DIR_OBJ)*.o $(LIBRARY_TEST) $(DIR_TEST_OBJ)*.o
-test: $(LIBRARY_TEST)
+	rm -rf $(LIBRARY) $(MYTERM) $(DIR_OBJ)*.o \
+	$(LIBRARY_TEST) $(MYTERM_TEST) $(DIR_TEST_OBJ)*.o $(DIR_TEMP)
+test: test-lib test-myterm
+test-lib: $(LIBRARY_TEST)
+test-myterm: $(MYTERM_TEST)
 
-#создание статической библиотеки
+#---создание статических библиотек---
+#library
 $(DIR_OBJ)library.o: $(DIR_SRC)library.c 
 	$(CC) $(CFLAGS) $< -o $@
 
 $(LIBRARY): $(DIR_OBJ)library.o
 	ar rcs $@ $^
 
-#тест
+#myTerm
+$(DIR_OBJ)myTerm.o: $(DIR_SRC)myTerm.c 
+	$(CC) $(CFLAGS) $< -o $@
+
+$(MYTERM): $(DIR_OBJ)myTerm.o
+	ar rcs $@ $^
+
+#---тесты---
 $(DIR_TEST_OBJ)main.o: $(DIR_TEST_SCR)main.c 
 	$(CC) $(CFLAGS) $< -o $@
 
+#library
 $(DIR_TEST_OBJ)library_test.o: $(DIR_TEST_SCR)library_test.c 
 	$(CC) -I src $(CFLAGS) $< -o $@
 
@@ -41,3 +58,11 @@ $(LIBRARY_TEST): $(DIR_OBJ)library.a $(DIR_TEST_OBJ)library_test.o \
 $(DIR_TEST_OBJ)main.o 
 	$(CC) $(DIR_OBJ)library.a $(DIR_TEST_OBJ)library_test.o \
 	$(DIR_TEST_OBJ)main.o -Wall -Werror -o $(LIBRARY_TEST)
+
+#myTerm
+$(DIR_TEST_OBJ)main_myTerm.o: $(DIR_TEST_SCR)main_myTerm.c 
+	$(CC) $(CFLAGS) $< -o $@
+
+$(MYTERM_TEST): $(DIR_OBJ)myTerm.a $(DIR_TEST_OBJ)main_myTerm.o
+	$(CC) $(DIR_OBJ)myTerm.a $(DIR_TEST_OBJ)main_myTerm.o \
+	-Wall -Werror -o $(MYTERM_TEST)
