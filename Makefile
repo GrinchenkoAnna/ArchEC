@@ -15,17 +15,20 @@ LIBRARY_TEST = $(DIR_BIN)library_test
 MYTERM = $(DIR_OBJ)myTerm.a
 MYTERM_TEST = $(DIR_BIN)myTerm_test
 
-.PHONY: all library myterm clean clean-test clean-all test
+DISPLAY = $(DIR_BIN)display
+
+.PHONY: all library myterm display clean clean-test clean-all test
 
 all: library myterm 
 library: $(LIBRARY)
 myterm: $(MYTERM)
+display: $(DISPLAY)
 clean: 
-	rm -rf $(LIBRARY) $(MYTERM) $(DIR_OBJ)*.o 
+	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(DIR_OBJ)*.o 
 clean-test:
 	rm -rf $(LIBRARY_TEST) $(MYTERM_TEST) $(DIR_TEST_OBJ)*.o $(DIR_TEMP)
 clean-all:
-	rm -rf $(LIBRARY) $(MYTERM) $(DIR_OBJ)*.o \
+	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(DIR_OBJ)*.o \
 	$(LIBRARY_TEST) $(MYTERM_TEST) $(DIR_TEST_OBJ)*.o $(DIR_TEMP)
 test: test-lib test-myterm
 test-lib: $(LIBRARY_TEST)
@@ -45,6 +48,14 @@ $(DIR_OBJ)myTerm.o: $(DIR_SRC)myTerm.c
 
 $(MYTERM): $(DIR_OBJ)myTerm.o
 	ar rcs $@ $^
+
+#display
+$(DIR_OBJ)display.o: $(DIR_SRC)display.c 
+	$(CC) $(CFLAGS) $< -o $@
+
+$(DISPLAY): $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)display.o
+	$(CC) $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)display.o \
+	-Wall -Werror -o $(DISPLAY)
 
 #---тесты---
 $(DIR_TEST_OBJ)main.o: $(DIR_TEST_SCR)main.c 

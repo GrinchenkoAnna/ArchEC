@@ -57,7 +57,7 @@
 #define ADDCC 75
 #define SUBCC 76
 
-short registr = 0;
+short registr = 0; //возможно, убрать потом
 int sc_memory[MEMORY_SIZE];
 //файл для загрузки/записи содержимого памяти
 char filename[] = "src/sc_memory_file.txt";

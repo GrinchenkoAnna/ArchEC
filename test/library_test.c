@@ -47,7 +47,7 @@ CTEST(LIBRARY, memoryGetFAIL) //sc_memory[101] == 1
 {
     int value;
     int result = sc_memoryGet(-2, &value); //error  
-    const int expected = 2;  
+    const int expected = -1;  
     ASSERT_EQUAL(expected, result);
 }
 
@@ -145,9 +145,9 @@ CTEST(LIBRARY, regGetOK_2) //getflag
 CTEST(LIBRARY, regGetFAIL) //getflag
 {       
     int value;
-    int result = sc_memoryGet(8, &value); //error
+    int result = sc_memoryGet(-1, &value); //error
 
-    const int expected = 0;  
+    const int expected = -1;  
     ASSERT_EQUAL(expected, result);
 }
 
@@ -165,7 +165,7 @@ CTEST(LIBRARY, commandEncodeFAIL_1)
     int value; 
     int result = sc_commandEncode(1, 10, &value); //2
 
-    const int expected = 2;  
+    const int expected = -1;  
     ASSERT_EQUAL(expected, result);
 }
 
@@ -174,7 +174,7 @@ CTEST(LIBRARY, commandEncodeFAIL_2)
     int value; 
     int result = sc_commandEncode(10, 200, &value); //2
 
-    const int expected = 2;  
+    const int expected = -1;  
     ASSERT_EQUAL(expected, result);
 }
 
@@ -183,7 +183,7 @@ CTEST(LIBRARY, commandEncodeFAIL_3)
     int value; 
     int result = sc_commandEncode(-2, 200, &value); //2
 
-    const int expected = 2;  
+    const int expected = -1;  
     ASSERT_EQUAL(expected, result);
 }
 

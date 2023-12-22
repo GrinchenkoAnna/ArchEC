@@ -8,7 +8,7 @@ int sc_memoryInit()
 
 int sc_memorySet(int address, int value)
 {
-    if (address <= 0 || address >= MEMORY_SIZE)
+    if ((address <= 0 || address >= MEMORY_SIZE) || (value > 9999))
     {
         registr = registr | (1 << MEMORY_ERROR);        
     }
@@ -21,7 +21,7 @@ int sc_memoryGet(int address, int* value)
     if (address <= 0 || address >= MEMORY_SIZE)
     {
         registr = registr | (1 << MEMORY_ERROR); 
-        return 2;
+        return -1;
     }
     else *value = sc_memory[address];  
     return *value; 
@@ -69,12 +69,12 @@ int sc_regSet(int reg, int value)
 
 int sc_regGet(int reg, int* value)
 {
-    if (reg >= OPERATION_OVERFLOW || reg <= INVALID_COMMAND) 
+    if (reg >= OPERATION_OVERFLOW && reg <= INVALID_COMMAND) 
     {
          *value = (registr >> reg) & 0x1;
          return *value;
     }
-    else return 2;
+    else return -1;
 }
 
 int sc_commandEncode(int command, int operand, int* value)
@@ -87,7 +87,7 @@ int sc_commandEncode(int command, int operand, int* value)
         && !(command >= JUMP && command <= HALT)
         && !(command >= NOT && command <= SUBCC)) 
         || operand < 0 
-        || operand > 127) return 2;
+        || operand > 127) return -1;
 
     *value = (command << 7) | operand;
     return *value;
