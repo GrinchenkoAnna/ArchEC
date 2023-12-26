@@ -15,24 +15,31 @@ LIBRARY_TEST = $(DIR_BIN)library_test
 MYTERM = $(DIR_OBJ)myTerm.a
 MYTERM_TEST = $(DIR_BIN)myTerm_test
 
+MYBIGCHARS = $(DIR_OBJ)myBigChars.a
+MYBIGCHARS_TEST = $(DIR_BIN)myBigChars_test
+
 DISPLAY = $(DIR_BIN)display
 
-.PHONY: all library myterm display clean clean-test clean-all test
+.PHONY: all library myterm mybchars display clean clean-test clean-all test
 
-all: library myterm 
+all: library myterm mybchars display
 library: $(LIBRARY)
 myterm: $(MYTERM)
+mybchars: $(MYBIGCHARS)
 display: $(DISPLAY)
 clean: 
-	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(DIR_OBJ)*.o 
+	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o 
 clean-test:
-	rm -rf $(LIBRARY_TEST) $(MYTERM_TEST) $(DIR_TEST_OBJ)*.o $(DIR_TEMP)
+	rm -rf $(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
+	$(DIR_TEMP)
 clean-all:
-	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(DIR_OBJ)*.o \
-	$(LIBRARY_TEST) $(MYTERM_TEST) $(DIR_TEST_OBJ)*.o $(DIR_TEMP)
-test: test-lib test-myterm
+	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o \
+	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
+	$(DIR_TEMP)
+test: test-lib test-myterm test-mybchars
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)
+test-mybchars: $(MYBIGCHARS_TEST)
 
 #---создание статических библиотек---
 #library
@@ -49,6 +56,15 @@ $(DIR_OBJ)myTerm.o: $(DIR_SRC)myTerm.c
 $(MYTERM): $(DIR_OBJ)myTerm.o
 	ar rcs $@ $^
 
+#myBigChars
+$(DIR_OBJ)myBigChars.o: $(DIR_SRC)myBigChars.c 
+	$(CC) $(CFLAGS) $< -o $@
+
+$(MYBIGCHARS): $(DIR_OBJ)myBigChars.o
+	ar rcs $@ $^
+
+
+#---вывод на экран---
 #display
 $(DIR_OBJ)display.o: $(DIR_SRC)display.c 
 	$(CC) $(CFLAGS) $< -o $@
@@ -77,3 +93,11 @@ $(DIR_TEST_OBJ)main_myTerm.o: $(DIR_TEST_SCR)main_myTerm.c
 $(MYTERM_TEST): $(DIR_OBJ)myTerm.a $(DIR_TEST_OBJ)main_myTerm.o
 	$(CC) $(DIR_OBJ)myTerm.a $(DIR_TEST_OBJ)main_myTerm.o \
 	-Wall -Werror -o $(MYTERM_TEST)
+
+#myBigChars
+$(DIR_TEST_OBJ)main_myBigChars.o: $(DIR_TEST_SCR)main_myBigChars.c 
+	$(CC) $(CFLAGS) $< -o $@
+
+$(MYBIGCHARS_TEST): $(DIR_OBJ)myBigChars.a $(DIR_TEST_OBJ)main_myBigChars.o
+	$(CC) $(DIR_OBJ)myBigChars.a $(DIR_TEST_OBJ)main_myBigChars.o \
+	-Wall -Werror -o $(MYBIGCHARS_TEST)
