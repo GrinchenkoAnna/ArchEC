@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include "myTerm.h"
 
-int bc_printA(char*);
+#define BIGCHARSIZE 8
 
+int bc_printA(char*);
+int bc_box(int, int, int, int);
+int bc_setbigcharpos(int*, int, int, int);
 
 #endif

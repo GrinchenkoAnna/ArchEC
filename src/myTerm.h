@@ -10,7 +10,7 @@ typedef enum colors
     BLACK = 30,
     RED,        //31
     GREEN,      //32
-    BROWN,      //33
+    YELLOW,      //33
     BLUE,       //34
     PURPLE,     //35
     CYAN,       //36
@@ -22,5 +22,6 @@ int mt_gotoXY(int, int);
 int mt_getscreensize(int*, int*);
 int mt_setfgcolor(dye);
 int mt_setbgcolor(dye);
+int mt_resetcolor();
 
 #endif

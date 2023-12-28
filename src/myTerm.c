@@ -32,3 +32,9 @@ int mt_setbgcolor(dye color)
     printf("\E[%dm", color + 10);
     return 0;
 }
+
+int mt_resetcolor()
+{
+    printf("\E[0m");
+    return 0;
+}
