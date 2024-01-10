@@ -31,11 +31,11 @@ clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o 
 clean-test:
 	rm -rf $(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
-	$(DIR_TEMP)
+	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt
 clean-all:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o \
 	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
-	$(DIR_TEMP)
+	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt
 test: test-lib test-myterm test-mybchars
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)

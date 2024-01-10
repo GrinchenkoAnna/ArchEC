@@ -16,6 +16,7 @@
         "tuple": "c",
         "type_traits": "c",
         "utility": "c",
-        "ioctl.h": "c"
+        "ioctl.h": "c",
+        "cerrno": "c"
     }
 }

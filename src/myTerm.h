@@ -14,7 +14,8 @@ typedef enum colors
     BLUE,       //34
     PURPLE,     //35
     CYAN,       //36
-    LIGHT_GRAY  //37
+    LIGHT_GRAY, //37
+    WHITE = 97
 } dye;
 
 int mt_clrscr(void);
