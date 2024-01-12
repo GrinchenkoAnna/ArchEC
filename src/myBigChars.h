@@ -16,5 +16,6 @@ int bc_box(int, int, int, int);
 int bc_setbigcharpos(int*, int, int, int);
 int bc_getbigcharpos(int*, int, int, int*);
 int bc_bigcharwrite(int, int*, int);
+int bc_bigcharread(int, int*, int, int*);
 
 #endif

@@ -31,11 +31,11 @@ clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o 
 clean-test:
 	rm -rf $(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
-	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt
+	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt
 clean-all:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o \
 	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
-	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt
+	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt
 test: test-lib test-myterm test-mybchars
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)
@@ -69,9 +69,10 @@ $(MYBIGCHARS): $(DIR_OBJ)myBigChars.o
 $(DIR_OBJ)display.o: $(DIR_SRC)display.c 
 	$(CC) $(CFLAGS) $< -o $@
 
-$(DISPLAY): $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)display.o
-	$(CC) $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)display.o \
-	-Wall -Werror -o $(DISPLAY)
+$(DISPLAY): $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)myBigChars.a \
+$(DIR_OBJ)display.o
+	$(CC) $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)myBigChars.a \
+	$(DIR_OBJ)display.o -Wall -Werror -o $(DISPLAY)
 
 #---тесты---
 $(DIR_TEST_OBJ)main.o: $(DIR_TEST_SCR)main.c 

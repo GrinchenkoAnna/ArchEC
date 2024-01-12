@@ -38,25 +38,65 @@ int main()
 
     int value;
     printf("В последнем изображении:\n");
-    printf("x = 4, y = 3: %d\n", \
-    bc_getbigcharpos(bigchar, 4, 3, &value)); //1
-    printf("x = 2, y = 3: %d\n", \
-    bc_getbigcharpos(bigchar, 2, 3, &value)); //0
+    bc_getbigcharpos(bigchar, 4, 3, &value);
+    printf("x = 4, y = 3: %d\n", value); //1
+    bc_getbigcharpos(bigchar, 2, 3, &value);
+    printf("x = 2, y = 3: %d\n", value); //0
 
-    printf("\nЗапись в файл:\n");
-    printf("bigchar[0] = %d\n", bigchar[0]);
-    printf("bigchar[1] = %d\n", bigchar[1]);
+    printf("\n---Запись в файл: успех\n");
+    int count = 3;
+    int bigchar_2symbols_to_write[2*count]; //массив для записи в файл
+    for (int i = 0; i < 2*count; i++) 
+    { bigchar_2symbols_to_write[i] = bigchar[i%2]; }
+    printf("bigchar_2symbols_to_write[0] = %d\n", bigchar_2symbols_to_write[0]);
+    printf("bigchar_2symbols_to_write[1] = %d\n", bigchar_2symbols_to_write[1]);
+    printf("bigchar_2symbols_to_write[2] = %d\n", bigchar_2symbols_to_write[2]);
+    printf("bigchar_2symbols_to_write[3] = %d\n", bigchar_2symbols_to_write[3]);
+    printf("bigchar_2symbols_to_write[4] = %d\n", bigchar_2symbols_to_write[4]);
+    printf("bigchar_2symbols_to_write[5] = %d\n", bigchar_2symbols_to_write[5]);
     //--запись--
     int fd = open("test/testfile.txt", O_RDWR | O_CREAT | O_TRUNC);
-    bc_bigcharwrite(fd, bigchar, 1);
+    if (bc_bigcharwrite(fd, bigchar_2symbols_to_write, count) == 0)
+    { printf("успешно записано\n"); }
+    else { printf("запись не осуществлена\n"); }
     //--чтение (проверка)--
-    int test_buffer[2];
+    int test_buffer_0[2*count];
     lseek(fd, 0, SEEK_SET);
-    read(fd, test_buffer, sizeof(test_buffer));
+    read(fd, test_buffer_0, sizeof(test_buffer_0)*count);
     printf("errno = %s\n", strerror(errno));
-    printf("test_buffer[0] = %d\n", test_buffer[0]);
-    printf("test_buffer[1] = %d\n", test_buffer[1]);
-    
+    printf("test_buffer_0[0] = %d\n", test_buffer_0[0]);
+    printf("test_buffer_0[1] = %d\n", test_buffer_0[1]);
+    printf("test_buffer_0[2] = %d\n", test_buffer_0[2]);
+    printf("test_buffer_0[3] = %d\n", test_buffer_0[3]);
+    printf("test_buffer_0[4] = %d\n", test_buffer_0[4]);
+    printf("test_buffer_0[5] = %d\n", test_buffer_0[5]);
+    //--неудачная запись--
+    printf("---Запись в файл: неудача\n");
+    if (bc_bigcharwrite(16, bigchar_2symbols_to_write, count) == 0)
+    { printf("успешно записано\n"); }
+    else { printf("запись не осуществлена\n"); }
+    errno = 0;
+
+    printf("\n---Чтение из файла: успех\n");    
+    int need_count = 2;
+    int test_buffer_1[2*need_count];
+    if (bc_bigcharread(fd, test_buffer_1, need_count, &count) == 0)
+    { printf("успешно считано\n"); }
+    else { printf("считано 0 символов\n"); }
+    printf("errno = %s\n", strerror(errno));
+    printf("count = %d\n", count);
+    printf("test_buffer_1[0] = %d\n", test_buffer_1[0]);
+    printf("test_buffer_1[1] = %d\n", test_buffer_1[1]);
+    printf("test_buffer_1[2] = %d\n", test_buffer_1[2]);
+    printf("test_buffer_1[3] = %d\n", test_buffer_1[3]);
+    //--считано 0 символов--
+    printf("---Чтение из файла: неудача\n"); 
+    int fd_empty = open("test/testfile_empty.txt", O_RDWR | O_CREAT | O_TRUNC);
+    if (bc_bigcharread(fd_empty, test_buffer_1, need_count, &count) == 0)
+    { printf("успешно считано\n"); }
+    else { printf("считано 0 символов\n"); }
+
     close(fd);
+    close(fd_empty);
     return 0;
 }
