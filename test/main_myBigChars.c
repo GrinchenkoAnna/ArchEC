@@ -16,7 +16,7 @@ int main()
     printf("\nневерные координаты для прямоугольника: возврат %d\n", \
     bc_box(-2, 10, -15, 50)); //0
 
-    int bigchar[2] = {-2122213018, 405029505};
+    int bigchar[2] = { -2122213018, 405029505 };
     //-2122213018 = 10000001 10000001 10011001 01100110
     //405029505 = 00011000 00100100 01000010 10000001
     printf("Bigchar:\n");
@@ -42,6 +42,18 @@ int main()
     printf("x = 4, y = 3: %d\n", value); //1
     bc_getbigcharpos(bigchar, 2, 3, &value);
     printf("x = 2, y = 3: %d\n", value); //0
+
+    printf("\nВывод цифр:\n");
+    bc_printbigchar(bigchar_0, 35, 0, LIGHT_GRAY, BLACK);
+    bc_printbigchar(bigchar_1, 35, 9, GREEN, BLACK);
+    bc_printbigchar(bigchar_2, 35, 17, YELLOW, BLACK);
+    bc_printbigchar(bigchar_3, 35, 25, BLUE, BLACK);
+    bc_printbigchar(bigchar_4, 35, 33, PURPLE, BLACK);
+    bc_printbigchar(bigchar_5, 35, 41, CYAN, BLACK);
+    bc_printbigchar(bigchar_6, 35, 49, WHITE, BLACK);
+    bc_printbigchar(bigchar_7, 35, 57, RED, BLACK);
+    bc_printbigchar(bigchar_8, 35, 65, GREEN, BLACK);
+    bc_printbigchar(bigchar_9, 35, 73, YELLOW, BLACK);
 
     printf("\n---Запись в файл: успех\n");
     int count = 3;

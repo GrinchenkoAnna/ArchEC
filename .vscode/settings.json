@@ -18,5 +18,9 @@
         "utility": "c",
         "ioctl.h": "c",
         "cerrno": "c"
+    },
+    "terminal.explorerKind": "external",
+    "terminal.integrated.automationProfile.linux": {
+        
     }
 }

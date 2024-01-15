@@ -10,27 +10,28 @@ int sc_memorySet(int address, int value)
 {
     if ((address <= 0 || address >= MEMORY_SIZE) || (value > 9999))
     {
-        registr = registr | (1 << MEMORY_ERROR);        
+        registr = registr | (1 << MEMORY_ERROR);
+        return -1;
     }
     else sc_memory[address] = value;
-    return ((registr >> MEMORY_ERROR) & 0x1); //флаг, не значение
+    return 0;
 }
 
-int sc_memoryGet(int address, int* value)
+int sc_memoryGet(int address, int *value)
 {
     if (address <= 0 || address >= MEMORY_SIZE)
     {
         registr = registr | (1 << MEMORY_ERROR); 
         return -1;
     }
-    else *value = sc_memory[address];  
-    return *value; 
+    *value = sc_memory[address];
+    return 0;
 }
 
 int sc_memorySave(char* filename)
 {
     FILE *sc_memory_file;
-    if ((sc_memory_file = fopen(filename, "wb")) == NULL) return 1;
+    if ((sc_memory_file = fopen(filename, "wb")) == NULL) return -1;
     fwrite(sc_memory, sizeof(int), MEMORY_SIZE, sc_memory_file);
     fclose(sc_memory_file);
 
@@ -40,7 +41,7 @@ int sc_memorySave(char* filename)
 int sc_memoryLoad(char* filename)
 {
     FILE *sc_memory_file;
-    if ((sc_memory_file = fopen(filename, "rb")) == NULL) return 1;
+    if ((sc_memory_file = fopen(filename, "rb")) == NULL) return -1;
     else 
     {
         fread(sc_memory, sizeof(int), MEMORY_SIZE, sc_memory_file);
@@ -57,13 +58,12 @@ int sc_regInit(void)
 
 int sc_regSet(int reg, int value)
 {
-    if (reg < OPERATION_OVERFLOW || reg > INVALID_COMMAND) return 1;
+    if (reg < OPERATION_OVERFLOW || reg > INVALID_COMMAND) return -1;
     else 
     {
         if (value) registr = registr | (1 << reg);
         else registr = registr & (~ (1 << reg));        
     }
-
     return 0;
 }
 
@@ -72,7 +72,7 @@ int sc_regGet(int reg, int* value)
     if (reg >= OPERATION_OVERFLOW && reg <= INVALID_COMMAND) 
     {
          *value = (registr >> reg) & 0x1;
-         return *value;
+         return 0;
     }
     else return -1;
 }
@@ -90,7 +90,7 @@ int sc_commandEncode(int command, int operand, int* value)
         || operand > 127) return -1;
 
     *value = (command << 7) | operand;
-    return *value;
+    return 0;
 }
 
 int sc_commandDecode(int value, int* command, int* operand)

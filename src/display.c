@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "library.c"
 #include "myTerm.c"
 #include "myBigChars.c"
@@ -5,6 +7,7 @@
 void print_memory()
 {
     int x = 2, y = 2;
+    int value = 0;
 
     bc_box(0, 0, 12, 60);
     mt_gotoXY(0, 28);
@@ -12,14 +15,16 @@ void print_memory()
 
     for (int i = 0; i < MEMORY_SIZE; i++)
     {
+        sc_memoryGet(i, &value);
+
         mt_gotoXY(x, y);
-        if (sc_memory[i] != 0) 
+        if (value != 0)
         {                 
             mt_setfgcolor(GREEN);
-            printf("+%.4d", sc_memory[i]);
+            printf("+%.4d", value);
             mt_setfgcolor(WHITE);
         }
-        else { printf("+%.4d", sc_memory[i]); } 
+        else { printf("+%.4d", value); }
 
         y += 6;
         if (i%10 == 9) { x++; y = 2; }
@@ -72,19 +77,74 @@ void print_keys()
 
 void print_bigChar(int memory_address)
 {
-    int bigchar[2];
+    int value;
 
     bc_box(12, 0, 22, 43);
+    if (sc_memoryGet(memory_address, &value) != 0) return;
+
+    if (value > 0) { bc_printbigchar(bigchar_plus, 14, 2, WHITE, BLACK); }
+    else if (value < 0) { bc_printbigchar(bigchar_minus, 14, 2, WHITE, BLACK); }
+    for (int i = 0; i < 4; i++)
+    {
+        switch (value/(int)pow(10, 3-i))
+        {
+            case 0:
+                bc_printbigchar(bigchar_0, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 1:
+                bc_printbigchar(bigchar_1, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 2:
+                bc_printbigchar(bigchar_2, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 3:
+                bc_printbigchar(bigchar_3, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 4:
+                bc_printbigchar(bigchar_4, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 5:
+                bc_printbigchar(bigchar_5, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 6:
+                bc_printbigchar(bigchar_6, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 7:
+                bc_printbigchar(bigchar_7, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 8:
+                bc_printbigchar(bigchar_8, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            case 9:
+                bc_printbigchar(bigchar_9, 14, 2+8*(i+1), WHITE, BLACK);
+                break;
+
+            default: break;
+        }
+        mt_gotoXY(25 + i, 0);
+        value %= (int)pow(10, 3-i);
+    }
     
 }
 
 int main()
 {
+    int address = 20; //адрес ячейки памяти
+
     mt_clrscr();
     mt_setbgcolor(BLACK);
     mt_setfgcolor(WHITE);
 
-    sc_memorySet(50, 9999); //для примера
+    sc_memorySet(address, 2024); //для примера
     print_memory();
 
     sc_regSet(OPERATION_OVERFLOW, 1); //для примера
@@ -92,8 +152,8 @@ int main()
 
     print_keys();
 
-    int instructionCounter = 50; //адрес ячейки памяти
-    print_bigChar(50);
+    print_bigChar(address);
+    sc_memorySet(address, 9999); //для примера
 
     mt_gotoXY(23, 0);
 
