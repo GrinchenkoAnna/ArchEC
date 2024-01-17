@@ -19,24 +19,32 @@ MYTERM_TEST = $(DIR_BIN)myTerm_test
 MYBIGCHARS = $(DIR_OBJ)myBigChars.a
 MYBIGCHARS_TEST = $(DIR_BIN)myBigChars_test
 
+MYREADKEY = $(DIR_OBJ)myReadkey.a
+MYREADKEY_TEST = $(DIR_BIN)myReadkey_test
+
 DISPLAY = $(DIR_BIN)display
 
-.PHONY: all library myterm mybchars display clean clean-test clean-all test
+.PHONY: all library myterm mybchars myreadkey display clean test
 
-all: library myterm mybchars display
+all: library myterm mybchars myreadkey display
 library: $(LIBRARY)
 myterm: $(MYTERM)
 mybchars: $(MYBIGCHARS)
+myreadkey: $(MYREADKEY)
 display: $(DISPLAY)
 clean:
-	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(DIR_OBJ)*.o \
-	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(DIR_TEST_OBJ)*.o \
-	$(DIR_TEMP) $(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
+	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
+	$(DIR_OBJ)*.o \
+	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(MYREADKEY_TEST) \
+	$(DIR_TEST_OBJ)*.o \
+	$(DIR_TEMP) \
+	$(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
 	$(DIR_TEST_SRC)*.o
-test: test-lib test-myterm test-mybchars
+test: test-lib test-myterm test-mybchars test-myreadkey
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)
 test-mybchars: $(MYBIGCHARS_TEST)
+test-myreadkey: $(MYREADKEY_TEST)
 
 #---создание статических библиотек---
 #library
@@ -58,6 +66,13 @@ $(DIR_OBJ)myBigChars.o: $(DIR_SRC)myBigChars.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(MYBIGCHARS): $(DIR_OBJ)myBigChars.o
+	ar rcs $@ $^
+
+#myReadkey
+$(DIR_OBJ)myReadkey.o: $(DIR_SRC)myReadkey.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(MYREADKEY): $(DIR_OBJ)myReadkey.o
 	ar rcs $@ $^
 
 
@@ -99,3 +114,11 @@ $(DIR_TEST_OBJ)main_myBigChars.o: $(DIR_TEST_SCR)main_myBigChars.c
 $(MYBIGCHARS_TEST): $(DIR_OBJ)myBigChars.a $(DIR_TEST_OBJ)main_myBigChars.o
 	$(CC) $(DIR_OBJ)myBigChars.a $(DIR_TEST_OBJ)main_myBigChars.o \
 	-Wall -Werror -o $(MYBIGCHARS_TEST)
+
+#myReadkey
+$(DIR_TEST_OBJ)main_myReadkey.o: $(DIR_TEST_SCR)main_myReadkey.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(MYREADKEY_TEST): $(DIR_OBJ)myReadkey.a $(DIR_TEST_OBJ)main_myReadkey.o
+	$(CC) $(DIR_OBJ)myReadkey.a $(DIR_TEST_OBJ)main_myReadkey.o \
+	-Wall -Werror -o $(MYREADKEY_TEST)
