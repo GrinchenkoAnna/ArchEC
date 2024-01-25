@@ -17,6 +17,7 @@ int rk_readkey(enum keys *key)
     else if (buffer[0] == 'r') { *key = KEY_r; }
     else if (buffer[0] == 't') { *key = KEY_t; }
     else if (buffer[0] == 'i') { *key = KEY_i; }
+    else if (buffer[0] == 'q') { *key = KEY_quit; }
     else if (!strcmp(buffer, "\E[15~") || !strcmp(buffer, "\E[[E"))
         { *key = KEY_F5; }
     else if (!strcmp(buffer, "\E[17~"))

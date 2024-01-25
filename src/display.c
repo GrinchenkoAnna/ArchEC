@@ -3,6 +3,10 @@
 #include "library.c"
 #include "myTerm.c"
 #include "myBigChars.c"
+#include "myReadkey.c"
+
+short instructionCounter = 0;
+unsigned int accumulator = 0;
 
 void print_memory()
 {
@@ -29,6 +33,28 @@ void print_memory()
         y += 6;
         if (i%10 == 9) { x++; y = 2; }
     }
+}
+
+void print_accumulator()
+{
+    bc_box(0, 62, 3, 84);
+    mt_gotoXY(1, 67);
+    printf(" accumulator ");
+    mt_gotoXY(2, 71);
+    if (accumulator >= 0) { printf("+"); }
+    else { printf("-"); }
+    printf("%.4d", accumulator);
+}
+
+void print_instructionCounter()
+{
+    bc_box(3, 62, 6, 84);
+    mt_gotoXY(4, 63);
+    printf(" instructionCounter ");
+    mt_gotoXY(5, 71);
+    if (instructionCounter >= 0) { printf("+"); }
+    else { printf("-"); }
+    printf("%.4d", instructionCounter);
 }
 
 void print_flags()
@@ -136,26 +162,121 @@ void print_bigChar(int memory_address)
     
 }
 
-int main()
-{
-    int address = 20; //адрес ячейки памяти
 
+
+void show_GUI()
+{
     mt_clrscr();
     mt_setbgcolor(BLACK);
     mt_setfgcolor(WHITE);
 
-    sc_memorySet(address, 2024); //для примера
     print_memory();
-
-    sc_regSet(OPERATION_OVERFLOW, 1); //для примера
+    print_accumulator();
+    print_instructionCounter();
     print_flags();
-
     print_keys();
+    print_bigChar(accumulator);
 
-    print_bigChar(address);
-    sc_memorySet(address, 9999); //для примера
 
-    mt_gotoXY(23, 0);
+    mt_gotoXY(30, 0);
+}
+
+void key_convert(enum keys key)
+{
+    switch (key)
+    {
+    case KEY_l:
+        sc_memoryLoad(filename);
+        break;
+
+    case KEY_s:
+        sc_memorySave(filename);
+        break;
+
+    case KEY_r:
+
+        break;
+
+    case KEY_F5:
+
+        break;
+
+    case KEY_i:
+
+        break;
+
+    case KEY_up:
+
+        break;
+
+    case KEY_down:
+
+        break;
+
+    case KEY_left:
+
+        break;
+
+    case KEY_right:
+
+        break;
+
+    case KEY_t:
+        mt_gotoXY(30, 0);
+        rk_mytermrestore();
+        printf("Accumulator > ");
+        rk_mytermregime(0, 0, 5, 1, 1);
+        printf("Accumulator > ");
+
+        char buffer[5];
+        int terminal = open("/dev/tty", O_RDWR);
+        read(terminal, buffer, 5);
+
+        sscanf(buffer, "%x", &accumulator);
+        rk_mytermregime(0, 0, 2, 0, 1);
+        break;
+
+    case KEY_F6:
+
+        break;
+
+    case KEY_enter:
+
+        break;
+
+    case KEY_default:
+        printf("Unknown command\n");
+        break;
+
+    case KEY_quit: break;
+    }
+}
+
+int main()
+{
+    enum keys key;
+
+    sc_regInit();
+    sc_memorySet(26, 2020);
+    sc_memorySave(filename);
+    sc_memoryInit();
+
+    rk_mytermsave();
+    rk_mytermregime(0, 0, 2, 1, 1);
+
+    show_GUI();
+
+    do
+    {
+        rk_readkey(&key);
+        key_convert(key);
+        show_GUI();
+
+    } while (key != KEY_quit);
+
+    mt_clrscr();
+    printf("Exit My Simple Computer. Terminal settings restored\n");
+    rk_mytermrestore();
 
     return 0;
 }

@@ -23,7 +23,8 @@ enum keys
   KEY_right,
   KEY_left,
   KEY_enter,
-  KEY_default
+  KEY_default,
+  KEY_quit
 };
 
 int rk_readkey(enum keys*);

@@ -127,7 +127,7 @@ int main()
             case KEY_default:
                 printf("такой клавиши нет в списке\n"); break;
             }
-    } while (key != KEY_default);
+    } while (key != KEY_quit);
 
     //rk_mytermsave
     FILE *myterm_settings;
