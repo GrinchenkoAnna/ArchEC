@@ -5,9 +5,6 @@
 #include "myBigChars.c"
 #include "myReadkey.c"
 
-short instructionCounter = 0;
-unsigned int accumulator = 0;
-
 void print_memory()
 {
     int x = 2, y = 2;
@@ -22,13 +19,18 @@ void print_memory()
         sc_memoryGet(i, &value);
 
         mt_gotoXY(x, y);
-        if (value != 0)
-        {                 
+        if (i == instructionCounter)
+        {
             mt_setfgcolor(GREEN);
-            printf("+%.4d", value);
+            if (value >= 0) { printf("+"); }
+            printf("%.4d", value);
             mt_setfgcolor(WHITE);
         }
-        else { printf("+%.4d", value); }
+        else
+        {
+            if (value >= 0) { printf("+"); }
+            printf("%.4d", value);
+        }
 
         y += 6;
         if (i%10 == 9) { x++; y = 2; }
@@ -42,7 +44,6 @@ void print_accumulator()
     printf(" accumulator ");
     mt_gotoXY(2, 71);
     if (accumulator >= 0) { printf("+"); }
-    else { printf("-"); }
     printf("%.4d", accumulator);
 }
 
@@ -60,7 +61,7 @@ void print_instructionCounter()
 void print_flags()
 {
     int value;
-    char flags[5] = {'O', 'D', 'M', 'C', 'I'};
+    char flags[5] = {'O', '0', 'M', 'T', 'E'};
 
     bc_box(9, 62, 12, 84);
     mt_gotoXY(10, 70);
@@ -69,11 +70,12 @@ void print_flags()
     mt_gotoXY(11, 69);
     for (int i = 0; i < 5; i++)
     {
-        if (sc_regGet(i, &value) == 0) { printf("%c ", flags[i]); }
-        else if (sc_regGet(i, &value) == 1) 
+        sc_regGet(i, &value);
+        if (value == 0) { printf("%c ", flags[i]); }
+        else if (value > 0)
         {
             mt_setfgcolor(RED); 
-            printf("%c ", flags[i]); 
+            printf("%c ", flags[i]);
             mt_setfgcolor(WHITE); 
         }
     }
@@ -106,10 +108,14 @@ void print_bigChar(int memory_address)
     int value;
 
     bc_box(12, 0, 22, 43);
-    if (sc_memoryGet(memory_address, &value) != 0) return;
+    if (sc_memoryGet(memory_address, &value) == -1) return;
 
-    if (value > 0) { bc_printbigchar(bigchar_plus, 14, 2, WHITE, BLACK); }
-    else if (value < 0) { bc_printbigchar(bigchar_minus, 14, 2, WHITE, BLACK); }
+    if (value >= 0) { bc_printbigchar(bigchar_plus, 14, 2, WHITE, BLACK); }
+    else if (value < 0)
+    {
+        bc_printbigchar(bigchar_minus, 14, 2, WHITE, BLACK);
+        value *= -1;
+    }
     for (int i = 0; i < 4; i++)
     {
         switch (value/(int)pow(10, 3-i))
@@ -159,10 +165,7 @@ void print_bigChar(int memory_address)
         mt_gotoXY(25 + i, 0);
         value %= (int)pow(10, 3-i);
     }
-    
 }
-
-
 
 void show_GUI()
 {
@@ -175,14 +178,16 @@ void show_GUI()
     print_instructionCounter();
     print_flags();
     print_keys();
-    print_bigChar(accumulator);
+    print_bigChar(instructionCounter);
 
-
-    mt_gotoXY(30, 0);
+    mt_gotoXY(32, 0);
 }
 
 void key_convert(enum keys key)
 {
+    char buffer[10];
+    int terminal = open("/dev/tty", O_RDWR);
+
     switch (key)
     {
     case KEY_l:
@@ -194,46 +199,65 @@ void key_convert(enum keys key)
         break;
 
     case KEY_r:
-
+        sc_regSet(IGNORING_CLOCK_PULSES, 0);
         break;
 
-    case KEY_F5:
+    case KEY_t:
 
         break;
 
     case KEY_i:
-
+        sc_memoryInit();
+        sc_regInit();
         break;
 
     case KEY_up:
-
+        if (instructionCounter - 10 >= 0) { instructionCounter -= 10; }
+        else { instructionCounter += 90; }
         break;
 
     case KEY_down:
-
+        if (instructionCounter + 10 <= 99) { instructionCounter += 10; }
+        else { instructionCounter -= 90; }
         break;
 
     case KEY_left:
-
+        if (instructionCounter - 1 >= 0) { instructionCounter--; }
+        else { instructionCounter = 99; }
         break;
 
     case KEY_right:
-
+        if (instructionCounter + 1 <= 99) { instructionCounter++; }
+        else { instructionCounter = 0; }
         break;
 
-    case KEY_t:
-        mt_gotoXY(30, 0);
-        rk_mytermrestore();
-        printf("Accumulator > ");
-        rk_mytermregime(0, 0, 5, 1, 1);
-        printf("Accumulator > ");
+    case KEY_F5:
+        read(terminal, &buffer, sizeof(buffer));
 
-        char buffer[5];
-        int terminal = open("/dev/tty", O_RDWR);
-        read(terminal, buffer, 5);
+        if (buffer[0] == '-')
+        {
+            accumulator = atoi(buffer + 1);
+            if (accumulator > 0) { accumulator *= -1; }
+        }
+        else if (buffer[0] == '+' || buffer[0] == '0' || buffer[0] == '1' ||
+                 buffer[0] == '2' || buffer[0] == '3' || buffer[0] == '4' ||
+                 buffer[0] == '5' || buffer[0] == '6' || buffer[0] == '7' ||
+                 buffer[0] == '8' || buffer[0] == '9')
+        {
+            if (buffer[0] == '+') { accumulator = atoi(buffer + 1); }
+            else { accumulator = atoi(buffer); }
 
-        sscanf(buffer, "%x", &accumulator);
-        rk_mytermregime(0, 0, 2, 0, 1);
+            if (accumulator < 0) { accumulator *= -1; }
+        }
+
+        if (accumulator > 9999 || accumulator < -9999)
+        {
+            sc_regSet(OPERATION_OVERFLOW, 1);
+            if (accumulator > 0) { accumulator = 9999; }
+            else { accumulator = -9999; }
+        }
+        else { sc_regSet(OPERATION_OVERFLOW, 0); }
+
         break;
 
     case KEY_F6:
@@ -241,6 +265,26 @@ void key_convert(enum keys key)
         break;
 
     case KEY_enter:
+        mt_gotoXY(24, 0);
+        printf("Enter the value: ");
+        read(terminal, &buffer, sizeof(buffer));
+
+        int value;
+        if (buffer[0] == '-')
+        {
+            value = atoi(buffer + 1);
+            value *= -1;
+        }
+        else if (buffer[0] == '+' || buffer[0] == '0' || buffer[0] == '1' ||
+                 buffer[0] == '2' || buffer[0] == '3' || buffer[0] == '4' ||
+                 buffer[0] == '5' || buffer[0] == '6' || buffer[0] == '7' ||
+                 buffer[0] == '8' || buffer[0] == '9')
+        {
+            if (buffer[0] == '+') { value = atoi(buffer + 1); }
+            else { value = atoi(buffer); }
+        }
+
+        sc_memorySet(instructionCounter, value);
 
         break;
 
@@ -256,13 +300,13 @@ int main()
 {
     enum keys key;
 
-    sc_regInit();
     sc_memorySet(26, 2020);
     sc_memorySave(filename);
     sc_memoryInit();
+    sc_regInit();
 
     rk_mytermsave();
-    rk_mytermregime(0, 0, 2, 1, 1);
+    rk_mytermregime(1, 0, 0, 1, 1);
 
     show_GUI();
 
@@ -271,7 +315,6 @@ int main()
         rk_readkey(&key);
         key_convert(key);
         show_GUI();
-
     } while (key != KEY_quit);
 
     mt_clrscr();

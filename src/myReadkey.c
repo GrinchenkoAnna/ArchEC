@@ -18,7 +18,8 @@ int rk_readkey(enum keys *key)
     else if (buffer[0] == 't') { *key = KEY_t; }
     else if (buffer[0] == 'i') { *key = KEY_i; }
     else if (buffer[0] == 'q') { *key = KEY_quit; }
-    else if (!strcmp(buffer, "\E[15~") || !strcmp(buffer, "\E[[E"))
+    else if (!strcmp(buffer, "\E[15~") || !strcmp(buffer, "\E[[E")
+             || !strcmp(buffer, "^[[15·"))
         { *key = KEY_F5; }
     else if (!strcmp(buffer, "\E[17~"))
         { *key = KEY_F6; }
@@ -26,7 +27,8 @@ int rk_readkey(enum keys *key)
         { *key = KEY_up; }
     else if (!strcmp(buffer, "\EOB") || !strcmp(buffer, "\E[B"))
         { *key = KEY_down; }
-    else if (!strcmp(buffer, "\EOC") || !strcmp(buffer, "\E[C"))
+    else if (!strcmp(buffer, "\EOC") || !strcmp(buffer, "\E[C")
+             || !strcmp(buffer, "^[[C"))
         { *key = KEY_right; }
        else if (!strcmp(buffer, "\EOD") || !strcmp(buffer, "\E[D"))
         { *key = KEY_left; }

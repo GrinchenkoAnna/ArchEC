@@ -124,6 +124,9 @@ int main()
             case KEY_enter:
                 printf("нажата enter\n"); break;
 
+             case KEY_quit:
+                printf("нажата q. Выход\n"); break;
+
             case KEY_default:
                 printf("такой клавиши нет в списке\n"); break;
             }

@@ -8,7 +8,8 @@ int sc_memoryInit()
 
 int sc_memorySet(int address, int value)
 {
-    if ((address <= 0 || address >= MEMORY_SIZE) || (value > 9999))
+    if ((address < 0 || address >= MEMORY_SIZE)
+        || value > 9999 || value < -9999)
     {
         registr = registr | (1 << MEMORY_ERROR);
         return -1;
@@ -19,7 +20,7 @@ int sc_memorySet(int address, int value)
 
 int sc_memoryGet(int address, int *value)
 {
-    if (address <= 0 || address >= MEMORY_SIZE)
+    if (address < 0 || address >= MEMORY_SIZE)
     {
         registr = registr | (1 << MEMORY_ERROR); 
         return -1;
