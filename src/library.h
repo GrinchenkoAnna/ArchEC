@@ -57,7 +57,7 @@
 #define ADDCC 75
 #define SUBCC 76
 
-short registr = 0; //возможно, убрать потом
+short registr = 0; 
 short instructionCounter = 0;
 int accumulator = 0;
 int sc_memory[MEMORY_SIZE];
