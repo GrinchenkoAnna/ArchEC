@@ -1,11 +1,13 @@
 
 #include <math.h>
 #include <sys/time.h>
+#include <signal.h>
+#include <unistd.h>
 
+#include "library.c"
 #include "myTerm.c"
 #include "myBigChars.c"
 #include "myReadkey.c"
-#include "mySignal.c"
 
 dye fg_color;
 dye bg_color;
@@ -207,6 +209,34 @@ void show_GUI(dye bg_color, dye fg_color)
     mt_gotoXY(32, 0);
 }
 
+void usersignalHandler(int signo)
+{   
+    sc_memoryInit();
+    sc_regInit();
+
+    sc_regSet(IGNORING_CLOCK_PULSES, 1);
+    instructionCounter = 0;
+    accumulator = 0;  
+
+    alarm(0);
+
+    show_GUI(bg_color, fg_color); 
+}
+
+void timerHandler(int signo)
+{
+    int value;
+    sc_regGet(IGNORING_CLOCK_PULSES, &value); // проверка (4)
+    
+    if ((instructionCounter >= 0 && instructionCounter < 99) && (value == 0)) //(4) = 0
+    { instructionCounter++; }
+    else if (instructionCounter >= 99) { instructionCounter = 0; }
+
+    if (value == 0) { alarm(1); } 
+
+    show_GUI(bg_color, fg_color);
+}
+
 void key_convert(enum keys key)
 {
     //char buffer[10];
@@ -310,29 +340,23 @@ void key_convert(enum keys key)
         default: break;
         }
     }
-    else
-    {
-        if (key == KEY_r)
+    if (key == KEY_r)
+    {            
+        int ignoring_clock_pulses_r;
+        sc_regGet(IGNORING_CLOCK_PULSES, &ignoring_clock_pulses_r);
+        if (ignoring_clock_pulses_r != 0) //(4) = 1
         {
-            sc_regGet(IGNORING_CLOCK_PULSES, &ignoring_clock_pulses);
-            if (ignoring_clock_pulses == 1) //(4) = 1
-            {
-                sc_regSet(IGNORING_CLOCK_PULSES, 0); 
-                timerHandler(SIGALRM); //вызвать обработчик
-            }
-            //else { sc_regSet(IGNORING_CLOCK_PULSES, 1); } //(4) = 0
+            sc_regSet(IGNORING_CLOCK_PULSES, 0); 
+            timerHandler(SIGALRM); //вызвать обработчик
         }
+        //else { sc_regSet(IGNORING_CLOCK_PULSES, 1); } //(4) = 0
+    }
 
-        else if (key == KEY_t) { timerHandler(SIGALRM); }
+    else if (key == KEY_t) { timerHandler(SIGALRM); }
 
-        else if (key == KEY_i) 
-        { 
-            raise(SIGUSR1); 
-            show_GUI(bg_color, fg_color);
-        }  
-    }   
-    
+    else if (key == KEY_i) { raise(SIGUSR1); }       
 }
+
 
 int main()
 {
