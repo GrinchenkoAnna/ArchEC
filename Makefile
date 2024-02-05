@@ -24,27 +24,32 @@ MYREADKEY_TEST = $(DIR_BIN)myReadkey_test
 
 DISPLAY = $(DIR_BIN)display
 
-.PHONY: all library myterm mybchars myreadkey display clean test
+HDD = $(DIR_OBJ)hdd.a
+HDD_TEST = $(DIR_BIN)hdd_test
 
-all: library myterm mybchars myreadkey display
+.PHONY: all library myterm mybchars myreadkey display hdd clean test
+
+all: library myterm mybchars myreadkey display hdd
 library: $(LIBRARY)
 myterm: $(MYTERM)
 mybchars: $(MYBIGCHARS)
 myreadkey: $(MYREADKEY)
 display: $(DISPLAY)
+hdd: $(HDD)
 clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
-	$(DIR_OBJ)*.o \
+	$(HDD) $(DIR_OBJ)*.o \
 	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(MYREADKEY_TEST) \
-	$(DIR_TEST_OBJ)*.o \
+	$(HDD_TEST) $(DIR_TEST_OBJ)*.o \
 	$(DIR_TEMP) \
 	$(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
 	$(DIR_TEST_SRC)*.o
-test: test-lib test-myterm test-mybchars test-myreadkey
+test: test-lib test-myterm test-mybchars test-myreadkey test-hdd
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)
 test-mybchars: $(MYBIGCHARS_TEST)
 test-myreadkey: $(MYREADKEY_TEST)
+test-hdd: $(HDD_TEST)
 
 #---создание статических библиотек---
 #library
@@ -75,6 +80,12 @@ $(DIR_OBJ)myReadkey.o: $(DIR_SRC)myReadkey.c
 $(MYREADKEY): $(DIR_OBJ)myReadkey.o
 	ar rcs $@ $^
 
+#hdd
+$(DIR_OBJ)hdd.o: $(DIR_SRC)hdd.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(HDD): $(DIR_OBJ)hdd.o
+	ar rcs $@ $^
 
 #---вывод на экран---
 #display
@@ -122,3 +133,11 @@ $(DIR_TEST_OBJ)main_myReadkey.o: $(DIR_TEST_SCR)main_myReadkey.c
 $(MYREADKEY_TEST): $(DIR_OBJ)myReadkey.a $(DIR_TEST_OBJ)main_myReadkey.o
 	$(CC) $(DIR_OBJ)myReadkey.a $(DIR_TEST_OBJ)main_myReadkey.o \
 	-Wall -Werror -o $(MYREADKEY_TEST)
+
+#hdd
+$(DIR_TEST_OBJ)main_hdd.o: $(DIR_TEST_SCR)main_hdd.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(HDD_TEST): $(DIR_OBJ)hdd.a $(DIR_TEST_OBJ)main_hdd.o
+	$(CC) $(DIR_OBJ)hdd.a $(DIR_TEST_OBJ)main_hdd.o \
+	-Wall -Werror -o $(HDD_TEST)

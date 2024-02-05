@@ -228,7 +228,7 @@ void timerHandler(int signo)
     int value;
     sc_regGet(IGNORING_CLOCK_PULSES, &value); // проверка (4)
     
-    if ((instructionCounter >= 0 && instructionCounter < 99) && (value == 0)) //(4) = 0
+    if (instructionCounter >= 0 && instructionCounter < 99) //(4) = 0
     { instructionCounter++; }
     else if (instructionCounter >= 99) { instructionCounter = 0; }
 
@@ -342,17 +342,15 @@ void key_convert(enum keys key)
     }
     if (key == KEY_r)
     {            
-        int ignoring_clock_pulses_r;
-        sc_regGet(IGNORING_CLOCK_PULSES, &ignoring_clock_pulses_r);
-        if (ignoring_clock_pulses_r != 0) //(4) = 1
-        {
-            sc_regSet(IGNORING_CLOCK_PULSES, 0); 
-            timerHandler(SIGALRM); //вызвать обработчик
-        }
-        //else { sc_regSet(IGNORING_CLOCK_PULSES, 1); } //(4) = 0
+        sc_regSet(IGNORING_CLOCK_PULSES, 0);
+        timerHandler(SIGALRM);
     }
 
-    else if (key == KEY_t) { timerHandler(SIGALRM); }
+    else if (key == KEY_t)
+    {
+        sc_regSet(IGNORING_CLOCK_PULSES, 1);
+        timerHandler(SIGALRM);
+    }
 
     else if (key == KEY_i) { raise(SIGUSR1); }       
 }
