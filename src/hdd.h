@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 typedef struct
 {
@@ -24,7 +25,10 @@ typedef struct
 
 typedef uint32_t tLBA;
 
-int LBA[8] = { 2, 4, 8, 16, 128, 255 };
+#define CHS_HEAD 4
+#define CHS_SECTOR 6
+
+int LBA[8] = { 2, 4, 8, 16, 32, 64, 128, 255 };
 
 int g_lba2chs (tLBA, tCHS*);
 int g_lba2large (tLBA, tLARGE*);
