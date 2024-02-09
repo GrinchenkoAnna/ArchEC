@@ -28,20 +28,20 @@ typedef uint32_t tLBA;
 #define CHS_HEAD 4
 #define CHS_SECTOR 6
 
-int LBA[8] = { 2, 4, 8, 16, 32, 64, 128, 255 };
+int LOG_H[8] = { 2, 4, 8, 16, 32, 64, 128, 255 };
 
-int g_lba2chs (tLBA, tCHS*);
-int g_lba2large (tLBA, tLARGE*);
-int g_lba2idechs (tLBA, tIDECHS*);
-int g_chs2large (tCHS, tLARGE*);
-int g_chs2lba (tCHS, tLBA*);
-int g_chs2idechs (tIDECHS, tLBA*);
-int g_large2chs (tLARGE, tCHS*);
+int g_lba2chs (tLBA, tCHS*); //-
+int g_lba2large (tLBA, tLARGE*); //-
+int g_lba2idechs (tLBA, tIDECHS*); //-
+int g_chs2large (tCHS, tLARGE*); //-
+int g_chs2lba (tCHS, tLBA*); //?
+int g_chs2idechs (tCHS, tIDECHS*); //-
+int g_large2chs (tLARGE, tCHS*); //-
 int g_large2idechs (tLARGE, tIDECHS*);
-int g_large2lba (tLARGE, tLBA*);
-int g_idechs2chs (tIDECHS, tCHS*);
+int g_large2lba (tLARGE, tLBA*); //?
+int g_idechs2chs (tIDECHS, tCHS*); //-
 int g_idechs2lagre (tIDECHS, tLARGE*);
-int g_idechs2lba (tIDECHS, tLBA*);
+int g_idechs2lba (tIDECHS, tLBA*); //?
 
 int a_lba2chs (tCHS geometry, tLBA, tCHS*);
 int a_lba2large (tLARGE geometry, tLBA, tLARGE*);
