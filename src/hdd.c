@@ -2,6 +2,7 @@
 
 /* Возможно, все неправильно */
 
+/* geometry */
 int g_lba2chs(tLBA lba, tCHS *chs)
 {
     chs->sector = 63;
@@ -18,7 +19,7 @@ int g_lba2chs(tLBA lba, tCHS *chs)
     }
 
     int K = 2;
-    while (logic_heads / K > 16) { K *= 2; }
+    while (logic_heads / K > 15) { K *= 2; }
 
     chs->head = logic_heads/K;
     chs->cylinder = L1/chs->head;
@@ -26,12 +27,13 @@ int g_lba2chs(tLBA lba, tCHS *chs)
     return 0;
 }
 
+//изучить и исправить
 int g_lba2large(tLBA lba, tLARGE *large)
 {
     large->sector = 63;
 
     int L1 = lba/63;
-    int logic_heads = L1/1024;
+    int logic_heads = L1/1023;
     for (int i = 0; i < 8; i++)
     {
         if (logic_heads < LOG_H[i])
@@ -42,7 +44,7 @@ int g_lba2large(tLBA lba, tLARGE *large)
     }
 
     int K = 2;
-    while (logic_heads / K > 256) { K *= 2; }
+    while (logic_heads / K > 255) { K *= 2; }
 
     large->head = logic_heads/K;
     large->cylinder = L1/large->head;
@@ -66,7 +68,7 @@ int g_lba2idechs(tLBA lba, tIDECHS *idechs)
     }
 
     int K = 2;
-    while (logic_heads / K > 16) { K *= 2; }
+    while (logic_heads / K > 15) { K *= 2; }
 
     idechs->head = logic_heads/K;
     idechs->cylinder = L1/idechs->head;
@@ -74,6 +76,7 @@ int g_lba2idechs(tLBA lba, tIDECHS *idechs)
     return 0;
 }
 
+//изучить и исправить
 int g_chs2large(tCHS chs, tLARGE *large)
 {
     int cylinders = chs.cylinder;
@@ -81,17 +84,14 @@ int g_chs2large(tCHS chs, tLARGE *large)
 
     large->sector = chs.sector;
 
-    while (cylinders/2 > 0 && heads*2 < 256)
+    while (cylinders/2 > 0 && heads*2 <= 256)
     {
         cylinders /= 2;
         heads *= 2;
     }
 
-    if (cylinders < 1024 && heads < 256)
-    {
-        large->cylinder = cylinders;
-        large->head = heads;
-    }
+    large->cylinder = cylinders;
+    large->head = heads;
 
     return 0;
 }
@@ -105,28 +105,30 @@ int g_chs2idechs(tCHS chs, tIDECHS *idechs)
     return 0;
 }
 
+//изучить и исправить
 int g_large2chs(tLARGE large, tCHS *chs)
 {
     int cylinders = large.cylinder;
-    int heads = large.head;
+    int heads = large.head + 1;
 
     chs->sector = large.sector;
 
-    while (cylinders*2 < 1024 && heads/2 > 0)
+    while (heads/2 > 0)
     {
         cylinders *= 2;
         heads /= 2;
     }
 
-    if (cylinders < 1024 && heads < 16)
+    if (cylinders < 1023 && heads < 15)
     {
         chs->cylinder = cylinders;
-        chs->head = heads;
+        chs->head = heads - 1;
     }
 
     return 0;
 }
 
+//изучить и исправить
 int g_large2idechs(tLARGE large, tIDECHS *idechs)
 {
     tLBA lba;
@@ -145,46 +147,114 @@ int g_idechs2chs (tIDECHS idechs, tCHS *chs)
     return 0;
 }
 
-//переделать
-int g_chs2lba (tCHS chs, tLBA *lba)
+int g_chs2lba(tCHS chs, tLBA *lba)
 {
-    int K = 2;
-    int heads = 0;
-    while (chs.head/K > 16) { K*= 2; }
-    heads = chs.head/K;
-
-    printf("heads = %d, cylinders = %d\n", heads, chs.cylinder*K);
-    *lba = chs.cylinder*K * heads * chs.sector;
+    *lba = chs.cylinder * chs.head * chs.sector;
 
     return 0;
 }
 
-//переделать
-int g_large2lba (tLARGE large, tLBA *lba)
+//изучить и исправить
+int g_large2lba(tLARGE large, tLBA *lba)
 {
-    int K = 2;
-    int heads = 0;
-    while (large.head/K > 256) { K*= 2; }
-    heads = large.head/K;
-
-    printf("heads = %d, cylinders = %d\n", heads, large.cylinder*K);
-    *lba = large.cylinder*K * heads * large.sector;
+    *lba = large.cylinder * large.head * large.sector;
 
     return 0;
 }
 
-//переделать
-int g_idechs2lba (tIDECHS idechs, tLBA *lba)
+int g_idechs2lba(tIDECHS idechs, tLBA *lba)
 {
-    int K = 2;
-    int heads = 0;
-    while (idechs.head/K > 16) { K*= 2; }
-    heads = idechs.head/K;
-
-    printf("heads = %d, cylinders = %d\n", heads, idechs.cylinder*K);
-    *lba = idechs.cylinder*K * heads * idechs.sector;
+    *lba = idechs.cylinder * idechs.head * idechs.sector;
 
     return 0;
 }
 
+/* adresses */
+int a_lba2chs (tCHS geometry, tLBA lba, tCHS *chs)
+{
+    int temp1 = lba/geometry.sector;
+    int temp2 = lba%geometry.sector;
 
+    chs->head = temp1%geometry.head;
+    chs->cylinder = temp1/geometry.head;
+    chs->sector = temp2 + 1;
+
+    return 0;
+}
+
+int a_lba2large (tLARGE geometry, tLBA lba, tLARGE *large)
+{
+
+
+    return 0;
+}
+
+int a_lba2idechs (tIDECHS geometry, tLBA lba, tIDECHS *idechs)
+{
+
+
+    return 0;
+}
+
+int a_chs2lba (tCHS geometry, tCHS chs, tLBA *lba)
+{
+    *lba = (chs.cylinder*geometry.head + chs.head)*geometry.sector + chs.sector - 1;
+
+    return 0;
+}
+
+int a_large2lba (tLARGE geometry, tLARGE large, tLBA *lba)
+{
+
+
+    return 0;
+}
+
+int a_idechs2lba (tIDECHS geometry, tIDECHS idechs, tLBA *lba)
+{
+
+
+    return 0;
+}
+
+int a_large2chs (tLARGE geometry1, tCHS geometry2, tLARGE large, tCHS *chs)
+{
+
+
+    return 0;
+}
+
+int a_large2idechs (tLARGE geometry1, tIDECHS geometry2, tLARGE large, tIDECHS *idechs)
+{
+
+
+    return 0;
+}
+
+int a_chs2large (tCHS geometry1, tLARGE geometry2, tCHS chs, tLARGE *large)
+{
+
+
+    return 0;
+}
+
+int a_idechs2large (tIDECHS geometry1, tLARGE geometry2, tIDECHS idechs, tLARGE *large)
+{
+
+
+    return 0;
+}
+
+int a_chs2idechs (tCHS geometry1, tIDECHS geometry2, tCHS chs, tIDECHS *idechs)
+{
+
+
+    return 0;
+}
+
+int a_idechs2chs (tIDECHS geometry1, tCHS geometry2, tIDECHS idechs, tCHS *chs)
+{
+
+
+    return 0;
+}

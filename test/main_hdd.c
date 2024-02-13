@@ -24,66 +24,65 @@ int main()
     printf("lba - %u, idechs - %u/%u/%u\n", lba, idechs.cylinder, idechs.head, idechs.sector);
 
     printf("\nCHS->Large\n");
-    chs.cylinder = 1238;
-    chs.head = 16;
+    chs.cylinder = 10602;
+    chs.head = 15;
     chs.sector = 63;
     g_chs2large(chs, &large);
     printf("chs - %u/%u/%u, large - %u/%u/%u\n", chs.cylinder, chs.head, chs.sector, large.cylinder, large.head, large.sector);
 
     printf("\nCHS->IDECHS\n");
-    chs.cylinder = 1238;
-    chs.head = 16;
+    chs.cylinder = 10602;
+    chs.head = 15;
     chs.sector = 63;
     g_chs2idechs(chs, &idechs);
     printf("chs - %u/%u/%u, idechs - %u/%u/%u\n", chs.cylinder, chs.head, chs.sector, idechs.cylinder, idechs.head, idechs.sector);
 
     printf("\nLarge->CHS\n");
-    large.cylinder = 154;
+    large.cylinder = 1252;
     large.head = 128;
     large.sector = 63;
     g_large2chs(large, &chs);
     printf("large - %u/%u/%u, chs - %u/%u/%u\n", large.cylinder, large.head, large.sector, chs.cylinder, chs.head, chs.sector);
 
-    printf("\nLarge->CHS\n");
-    large.cylinder = 154;
-    large.head = 128;
-    large.sector = 63;
-    g_large2chs(large, &chs);
-    printf("large - %u/%u/%u, chs - %u/%u/%u\n", large.cylinder, large.head, large.sector, chs.cylinder, chs.head, chs.sector);
 
     printf("\nLarge->IDECHS\n");
-     large.cylinder = 154;
+    large.cylinder = 1252;
     large.head = 128;
     large.sector = 63;
     g_large2idechs(large, &idechs);
-    printf("large - %u/%u/%u, chs - %u/%u/%u\n", large.cylinder, large.head, large.sector, idechs.cylinder, idechs.head, idechs.sector);
+    printf("large - %u/%u/%u, idechs - %u/%u/%u\n", large.cylinder, large.head, large.sector, idechs.cylinder, idechs.head, idechs.sector);
 
-    printf("\nFIX!");
     printf("\nCHS->LBA\n");
-    //log.geom!!!
-    chs.cylinder = 623;
-    chs.head = 255;
+    chs.cylinder = 10602;
+    chs.head = 15;
     chs.sector = 63;
     g_chs2lba(chs, &lba);
     printf("chs - %u/%u/%u, lba - %u\n", chs.cylinder, chs.head, chs.sector, lba);
 
-    printf("\nFIX!");
     printf("\nLarge->LBA\n");
-    //log.geom!!!
-    large.cylinder = 623;
-    large.head = 255;
+    large.cylinder = 1252;
+    large.head = 128;
     large.sector = 63;
     g_large2lba(large, &lba);
-    printf("chs - %u/%u/%u, lba - %u\n", large.cylinder, large.head, large.sector, lba);
+    printf("large - %u/%u/%u, lba - %u\n", large.cylinder, large.head, large.sector, lba);
 
-    printf("\nFIX!");
     printf("\nIDECHS->LBA\n");
-    //log.geom!!!
-    idechs.cylinder = 623;
-    idechs.head = 255;
-    idechs.sector = 63;
+    idechs.cylinder = 39289;
+    idechs.head = 1;
+    idechs.sector = 255;
     g_idechs2lba(idechs, &lba);
     printf("chs - %u/%u/%u, lba - %u\n", idechs.cylinder, idechs.head, idechs.sector, lba);
+
+    printf("\n\n>>Adresses\n");
+    tCHS geometry = { 10602, 15, 63 };
+    printf("LBA->CHS\n");
+    a_lba2chs(geometry, lba, &chs);
+    printf("geometry - %u, %u, %u\nlba - %u, chs - %u/%u/%u\n", geometry.cylinder, geometry.head, geometry.sector, lba, chs.cylinder, chs.head, chs.sector);
+
+    printf("\nLBA->CHS\n");
+    a_chs2lba(geometry, chs, &lba);
+    printf("geometry - %u, %u, %u\nchs - %u/%u/%u, lba - %u\n", geometry.cylinder, geometry.head, geometry.sector, chs.cylinder, chs.head, chs.sector, lba);
+
 
     return 0;
 }
