@@ -184,14 +184,24 @@ int a_lba2chs (tCHS geometry, tLBA lba, tCHS *chs)
 
 int a_lba2large (tLARGE geometry, tLBA lba, tLARGE *large)
 {
+    int temp1 = lba/geometry.sector;
+    int temp2 = lba%geometry.sector;
 
+    large->head = temp1%geometry.head;
+    large->cylinder = temp1/geometry.head;
+    large->sector = temp2 + 1;
 
     return 0;
 }
 
 int a_lba2idechs (tIDECHS geometry, tLBA lba, tIDECHS *idechs)
 {
+    int temp1 = lba/geometry.sector;
+    int temp2 = lba%geometry.sector;
 
+    idechs->head = temp1%geometry.head;
+    idechs->cylinder = temp1/geometry.head;
+    idechs->sector = temp2 + 1;
 
     return 0;
 }
@@ -205,56 +215,68 @@ int a_chs2lba (tCHS geometry, tCHS chs, tLBA *lba)
 
 int a_large2lba (tLARGE geometry, tLARGE large, tLBA *lba)
 {
-
+    *lba = (large.cylinder*geometry.head + large.head)*geometry.sector + large.sector - 1;
 
     return 0;
 }
 
 int a_idechs2lba (tIDECHS geometry, tIDECHS idechs, tLBA *lba)
 {
-
-
-    return 0;
-}
-
-int a_large2chs (tLARGE geometry1, tCHS geometry2, tLARGE large, tCHS *chs)
-{
-
+    *lba = (idechs.cylinder*geometry.head + idechs.head)*geometry.sector + idechs.sector - 1;
 
     return 0;
 }
 
-int a_large2idechs (tLARGE geometry1, tIDECHS geometry2, tLARGE large, tIDECHS *idechs)
+int a_large2chs (tLARGE geometry_large, tCHS geometry_chs, tLARGE large, tCHS *chs)
 {
-
+    tLBA lba;
+    a_large2lba(geometry_large, large, &lba);
+    a_lba2chs(geometry_chs, lba, chs);
 
     return 0;
 }
 
-int a_chs2large (tCHS geometry1, tLARGE geometry2, tCHS chs, tLARGE *large)
+int a_large2idechs (tLARGE geometry_large, tIDECHS geometry_idechs, tLARGE large, tIDECHS *idechs)
 {
-
+    tLBA lba;
+    a_large2lba(geometry_large, large, &lba);
+    a_lba2idechs(geometry_idechs, lba, idechs);
 
     return 0;
 }
 
-int a_idechs2large (tIDECHS geometry1, tLARGE geometry2, tIDECHS idechs, tLARGE *large)
+int a_chs2large (tCHS geometry_chs, tLARGE geometry_large, tCHS chs, tLARGE *large)
 {
-
+    tLBA lba;
+    a_chs2lba(geometry_chs, chs, &lba);
+    a_lba2large(geometry_large, lba, large);
 
     return 0;
 }
 
-int a_chs2idechs (tCHS geometry1, tIDECHS geometry2, tCHS chs, tIDECHS *idechs)
+int a_idechs2large (tIDECHS geometry_idechs, tLARGE geometry_large, tIDECHS idechs, tLARGE *large)
 {
-
+    tLBA lba;
+    a_idechs2lba(geometry_idechs, idechs, &lba);
+    a_lba2large(geometry_large, lba, large);
 
     return 0;
 }
 
-int a_idechs2chs (tIDECHS geometry1, tCHS geometry2, tIDECHS idechs, tCHS *chs)
+int a_chs2idechs (tCHS geometry_chs, tIDECHS geometry_idechs, tCHS chs, tIDECHS *idechs)
 {
+    tLBA lba;
+    a_chs2lba(geometry_chs, chs, &lba);
+    a_lba2idechs(geometry_idechs, lba, idechs);
 
+    return 0;
+}
+
+int a_idechs2chs (tIDECHS geometry_idechs, tCHS geometry_chs, tIDECHS idechs, tCHS *chs)
+{
+    tLBA lba;
+    a_idechs2lba(geometry_idechs, idechs, &lba);
+    a_lba2chs(geometry_chs, lba, chs);
 
     return 0;
 }
