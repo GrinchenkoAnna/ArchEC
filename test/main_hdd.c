@@ -6,6 +6,172 @@
 
 #include "../src/hdd.c"
 
+//элемент таблицы разделов
+typedef struct pt_entry
+{
+    unsigned int bootable;        //флаг активности раздела
+    tCHS start_part;              //CHS адрес начального сектора раздела
+    unsigned int type_part;       //системный идентификатор (кодовый идентификатор ОС)
+    tCHS end_part;                //CHS адрес конечного сектора раздела
+    unsigned int sect_before;     //LBA адрес начального сектора (число секторов перед разделом)
+    unsigned int sect_total;      //размер раздела в секторах
+    long size;                    //размер раздела
+    tLBA address;                 //адрес начала раздела
+} pt_entry_t;
+
+pt_entry_t *pttable = NULL;
+
+tLBA start = 1;
+tLBA end;
+
+//формирование таблицы разделов
+int entered_value;
+tIDECHS idechs_hdd;
+uint16_t max_cylinders = 65535;
+uint8_t max_heads = 15;
+uint8_t max_sectors = 255;
+tLBA lba_hdd;
+tCHS chs_hdd;
+bool active = false;
+bool extended = false;
+long part_size;
+
+
+void create_partition_table(unsigned long long int hdd_size, pt_entry_t *pttable)
+{
+    int parts = -1;
+    pttable = malloc(sizeof(pt_entry_t));
+    while (hdd_size > 0)
+    {
+        printf("Доступно: %llu Kb\n", hdd_size);
+        parts++;
+        printf("Введите размер требуемого раздела на диске (Kb):\n");
+    scanf("%d", &entered_value);
+        if (entered_value == 0) { break; }
+        pttable = realloc(pttable, sizeof(pt_entry_t)*(parts + 1));
+
+        part_size = entered_value;
+        pttable[parts].size = entered_value;
+        pttable[parts].address = start;
+        pttable[parts].sect_before = start;
+        a_lba2chs(chs_hdd, pttable[parts].address, &pttable[parts].start_part);
+        end = start + part_size;
+        a_lba2chs(chs_hdd, end, &pttable[parts].end_part);
+        pttable[parts].sect_total = pttable[parts].end_part.sector - pttable[parts].start_part.sector;
+        if (pttable[parts].sect_total < 0) { pttable[parts].sect_total *= -1; }
+
+enter_os:
+        printf("Введите тип ОС (№):\n");
+        printf(" 0. Empty\n");
+        printf(" 1. FAT12\n");
+        printf(" 2. FAT16 <32M\n");
+        printf(" 3. Расширенный\n");
+        printf(" 4. MS-DOS FAT16\n");
+        printf(" 5. HPFS/NTFS\n");
+        printf(" 6. Win95 FAT32 (LBA)\n");
+        printf(" 7. Win95 FAT16\n");
+        printf(" 8. Linux swap\n");
+        printf(" 9. Linux\n");
+        scanf("%d", &entered_value);
+        switch (entered_value)
+        {
+        case 0:
+            pttable[parts].type_part = 0x00;
+            break;
+
+        case 1:
+            pttable[parts].type_part = 0x01;
+            break;
+
+        case 2:
+            pttable[parts].type_part = 0x04;
+            break;
+
+        case 3:
+            pttable[parts].type_part = 0x05;
+            extended = true;
+            pt_entry_t *pptable_extended = NULL;
+            create_partition_table(pttable[parts].size, pptable_extended);
+            extended = false;
+            break;
+
+        case 4:
+            pttable[parts].type_part = 0x06;
+            break;
+
+        case 5:
+            pttable[parts].type_part = 0x07;
+            break;
+
+        case 6:
+            pttable[parts].type_part = 0x0c;
+            break;
+
+        case 7:
+            pttable[parts].type_part = 0x0e;
+            break;
+
+        case 8:
+            pttable[parts].type_part = 0x82;
+            break;
+
+        case 9:
+            pttable[parts].type_part = 0x83;
+            break;
+
+        default:
+            printf("Error: wrong OS type. Repeat the input.\n");
+            goto enter_os;
+            break;
+        }
+
+        if (!active)
+        {
+enter_bootable:
+            printf("Будет ли данный раздел активным? (y/n)\n");
+            char choice;
+            scanf("%c", &choice);
+            scanf("%c", &choice);
+
+            if (choice == 'y')
+            {
+                pttable[parts].bootable = 128;
+                active = true;
+            }
+            else if (choice == 'n') { pttable[parts].bootable = 0; }
+            else
+            {
+                printf("Error: wrong answer. Repeat the input.\n");
+                goto enter_bootable;
+            }
+        }
+        else { pttable[parts].bootable = 0; }
+
+        start += pttable[parts].size;
+        hdd_size -= pttable[parts].size;
+    }
+
+    if (extended)
+    {
+        printf("Расширенная таблица разделов\n");
+        parts++;
+    }
+    else
+    { printf("Основная таблица разделов\n"); }
+    printf("Активный | CHS начало | Сист. ID | CHS конец  | LBA начало        | Размер (сект.)\n");
+    for (int i = 0; i < parts; i++)
+    {
+        printf("---------+------------+----------+------------+-------------------+---------------\n");
+        printf("%-3x      | %-.4u/%-.2u/%-.2u | 0x%-4x   | %-.4u/%-.2u/%-.2u | %-10d        | %-10d\n",
+        pttable[i].bootable,
+        pttable[i].start_part.cylinder, pttable[i].start_part.head, pttable[i].start_part.sector,
+        pttable[i].type_part,
+        pttable[i].end_part.cylinder, pttable[i].end_part.head, pttable[i].end_part.sector,
+        pttable[i].sect_before,
+        pttable[i].sect_total);
+    }
+}
+
 int main()
 {
     printf(">>Geometry\n");
@@ -180,39 +346,6 @@ int main()
 /*--------------------------------------------------*/
     printf("\n\n>>Задание на лабораторную работу\n");
 
-    //элемент таблицы разделов
-    typedef struct pt_entry
-    {
-        unsigned char bootable;       //флаг активности раздела
-        tCHS start_part;              //CHS адрес начального сектора раздела
-        unsigned char type_part;      //системный идентификатор (кодовый идентификатор ОС)
-        tCHS end_part;                //CHS адрес конечного сектора раздела
-        unsigned int sect_before;     //LBA адрес начального сектора (число секторов перед разделом)
-        unsigned int sect_total;      //размер раздела в секторах
-        long size;                    //размер раздела
-        tLBA address;                 //адрес начала раздела
-        struct pt_entry *next;
-    } pt_entry_t;
-
-    pt_entry_t *head = (pt_entry_t*)malloc(sizeof(pt_entry_t));
-    head = NULL;
-    //pt_entry_t *tail = NULL;
-
-    tLBA start = 1;
-    tLBA end;
-    /* tCHS start_part  = { 0, 0, 1 }; */
-    /* tCHS end_part; */
-
-    //формирование таблицы разделов
-    int entered_value;
-    tIDECHS idechs_hdd;
-    uint16_t max_cylinders = 65535;
-    uint8_t max_heads = 15;
-    uint8_t max_sectors = 255;
-    tLBA lba_hdd;
-    tCHS chs_hdd;
-    bool active = false;
-
     printf("Введите геометрию диска в формате IDECHS:\n");
 
 enter_c:
@@ -245,126 +378,12 @@ enter_s:
     }
     idechs_hdd.sector = entered_value;
 
-    //убрать ненужное
     g_idechs2chs(idechs_hdd, &chs_hdd);
-    printf("chs geom: %d/%d/%d\n", chs_hdd.cylinder, chs.head, chs.sector);
-    g_idechs2lba(idechs_hdd, &lba_hdd);
-
     long double hdd_size = (long double)(idechs_hdd.cylinder * idechs_hdd.head * idechs_hdd.sector)/(1024 * 1024);
     printf("Размер диска: %.2Lf Gb\n", hdd_size);
+    unsigned long long int hdd_size_kb = hdd_size*1024*1024;
 
-    //цикл для всех записей
-    printf("Введите размер требуемого раздела на диске (Kb):\n");
-    scanf("%d", &entered_value);
-    pt_entry_t *part = (pt_entry_t*)malloc(sizeof(pt_entry_t));
-    if (entered_value <= hdd_size*1024*1024) //пока - самый первый раздел
-    {
-        part->size = entered_value;
-        part->address = start;
-        part->sect_before = start;
-        a_lba2chs(chs_hdd, part->address, &part->start_part);
-        end = start + part->size;
-        a_lba2chs(chs_hdd, end, &part->end_part);
-        part->sect_total = part->end_part.sector - part->start_part.sector;
-
-enter_os:
-        printf("Введите тип ОС (№):\n");
-        printf(" 1. Empty\n");
-        printf(" 2. FAT12\n");
-        printf(" 3. FAT16 <32M\n");
-        printf(" 4. Расширенный\n");
-        printf(" 5. MS-DOS FAT16\n");
-        printf(" 6. HPFS/NTFS\n");
-        printf(" 7. Win95 FAT32 (LBA)\n");
-        printf(" 8. Win95 FAT16\n");
-        printf(" 9. Linux swap\n");
-        printf("10. Linux\n");
-        scanf("%d", &entered_value);
-        switch (entered_value)
-        {
-        case 1:
-            part->type_part = 0x00;
-            break;
-
-        case 2:
-            part->type_part = 0x01;
-            break;
-
-        case 3:
-            part->type_part = 0x04;
-            break;
-
-        case 4:
-            part->type_part = 0x05;
-            break;
-
-        case 5:
-            part->type_part = 0x06;
-            break;
-
-        case 6:
-            part->type_part = 0x07;
-            break;
-
-        case 7:
-            part->type_part = 0x0c;
-            break;
-
-        case 8:
-            part->type_part = 0x0e;
-            break;
-
-        case 9:
-            part->type_part = 0x82;
-            break;
-
-        case 10:
-            part->type_part = 0x83;
-
-        default:
-            printf("Error: wrong OS type. Repeat the input.\n");
-            goto enter_os;
-            break;
-        }
-
-        if (!active)
-        {
-            //поправить - пропускает (что-то в буфере?)
-            printf("Будет ли данный раздел активным? (y/n)\n");
-            char choice;
-            scanf("%c", &choice);
-            scanf("%c", &choice);
-            //отправлять пользователя вводить заново, если он ввел что попало
-            if (choice == 'y')
-            {
-                part->bootable = 128;
-                active = true;
-            }
-            else { part->bootable = 0; }
-        }
-
-        //для расширенного раздела - разработать алгоритм
-
-        start += part->size;
-        hdd_size -= part->size;
-
-        part->next = head;
-        head = part;
-    }
-
-    //цикл для всех записей
-    pt_entry_t *temp = (pt_entry_t*)malloc(sizeof(pt_entry_t));
-    temp = head;
-    printf("Активный | CHS начало | Сист. ID | CHS конец  | LBA начало        | Размер (сект.)\n");
-    printf("---------+------------+----------+------------+-------------------+---------------\n");
-    printf("%-3x      | %-.4u/%-.2u/%-.2u | %-4x     | %-.4u/%-.2u/%-.2u | %-10d        | %-10d\n",
-           temp->bootable,
-           temp->start_part.cylinder, temp->start_part.head, temp->start_part.sector,
-           temp->type_part,
-           temp->end_part.cylinder, temp->end_part.head, temp->end_part.sector,
-           temp->sect_before,
-           temp->sect_total);
-
+    create_partition_table(hdd_size_kb, pttable);
 
     return 0;
 }
