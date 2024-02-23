@@ -1,5 +1,28 @@
 #include "myTerm.h"
 
+int mt_readfromterm(char *buffer, int size)
+{
+    int terminal = open("/dev/tty", O_RDWR);
+    if (terminal == -1) { return -1; }
+
+    int symbols_read = read(terminal, buffer, size);
+    buffer[symbols_read] = '\0';
+    close(terminal);
+
+    return 0;
+}
+
+int mt_printtoterm(char *buffer)
+{
+    int terminal = open("/dev/tty", O_RDWR);
+    if (terminal == -1) { return -1; }
+
+    write(terminal, buffer, strlen(buffer));
+    close(terminal);
+
+    return 0;
+}
+
 int mt_clrscr(void)
 {
     printf("\E[H\E[J");

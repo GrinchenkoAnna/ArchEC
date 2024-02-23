@@ -3,7 +3,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 typedef enum colors 
 {
@@ -17,6 +22,9 @@ typedef enum colors
   LIGHT_GRAY, //37
   WHITE = 97
 } dye;
+
+int mt_readfromterm(char*, int);
+int mt_printtoterm(char*);
 
 int mt_clrscr(void);
 int mt_gotoXY(int, int);

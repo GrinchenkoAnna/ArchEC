@@ -2,7 +2,28 @@
 
 int fREAD(int operand)
 {
+    mt_gotoXY(24, 0);
 
+    mt_printtoterm("Value:>");
+    char buffer[2];
+    mt_readfromterm(buffer, sizeof(buffer));
+
+    int value;
+    if (buffer[0] == '-')
+    {
+        value = atoi(buffer + 1);
+        value *= -1;
+    }
+    else if (buffer[0] == '+' || buffer[0] == '0' || buffer[0] == '1' ||
+             buffer[0] == '2' || buffer[0] == '3' || buffer[0] == '4' ||
+             buffer[0] == '5' || buffer[0] == '6' || buffer[0] == '7' ||
+             buffer[0] == '8' || buffer[0] == '9')
+    {
+         if (buffer[0] == '+') { value = atoi(buffer + 1); }
+         else { value = atoi(buffer); }
+    }
+
+    sc_memorySet(instructionCounter, value);
 
     return 0;
 }
@@ -66,6 +87,11 @@ int CU()
 {
     int value, command, operand;
     sc_memoryGet(instructionCounter, &value);
+    if (value == 0)
+    {
+        mt_gotoXY(100, 100);
+        mt_printtoterm("Value:>");
+    }
     if (sc_commandDecode(value, &command, &operand) == -1)
     {
         sc_regSet(INVALID_COMMAND, 1);

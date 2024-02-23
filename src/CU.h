@@ -1,14 +1,10 @@
 #ifndef CU_H
 #define CU_H
 
-//#include "library.c"
-//#include "display.c"
-//#include "myTerm.c"
-//#include "myBigChars.c"
-//#include "myReadkey.c"
 #include "ALU.c"
+#include "show_GUI.c"
 
-int CU(void);
+int CU();
 
 int fREAD(int operand);
 int fWRITE(int operand);

@@ -47,6 +47,7 @@ clean:
 	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(MYREADKEY_TEST) \
 	$(HDD_TEST) $(DIR_TEST_OBJ)*.o \
 	$(DIR_TEMP) \
+	$(DIR_BIN)* \
 	$(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
 	$(DIR_TEST_SRC)*.o
 test: test-lib test-myterm test-mybchars test-myreadkey test-hdd
@@ -99,9 +100,15 @@ $(CU): $(DIR_SRC)CU.c
 $(ALU): $(DIR_SRC)ALU.c
 	$(CC) $(DIR_SRC)ALU.c -Wall -Werror -o $(ALU)
 
+$(DIR_OBJ)Signal.o: $(DIR_SRC)Signal.c
+	$(CC) -Wall -Werror -o $(DIR_OBJ)Signal.o
+
+$(DIR_OBJ)show_GUI.o: $(DIR_SRC)show_GUI.c
+	$(CC) -lm -Wall -Werror -o $(DIR_OBJ)show_GUI.o
+
 #---вывод на экран---
 #display
-$(DIR_OBJ)display.o: $(DIR_SRC)display.c 
+$(DIR_OBJ)display.o: $(DIR_SRC)display.c
 	$(CC) $(CFLAGS) -lm $< -o $@
 
 $(DISPLAY): $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)myBigChars.a \
