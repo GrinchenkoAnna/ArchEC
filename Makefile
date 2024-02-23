@@ -27,7 +27,10 @@ DISPLAY = $(DIR_BIN)display
 HDD = $(DIR_OBJ)hdd.a
 HDD_TEST = $(DIR_BIN)hdd_test
 
-.PHONY: all library myterm mybchars myreadkey display hdd clean test
+CU = $(DIR_BIN)CU
+ALU = $(DIR_BIN)ALU
+
+.PHONY: all library myterm mybchars myreadkey display hdd cu alu clean test
 
 all: library myterm mybchars myreadkey display hdd
 library: $(LIBRARY)
@@ -36,6 +39,8 @@ mybchars: $(MYBIGCHARS)
 myreadkey: $(MYREADKEY)
 display: $(DISPLAY)
 hdd: $(HDD)
+cu: $(CU)
+alu: $(ALU)
 clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
 	$(HDD) $(DIR_OBJ)*.o \
@@ -86,6 +91,13 @@ $(DIR_OBJ)hdd.o: $(DIR_SRC)hdd.c
 
 $(HDD): $(DIR_OBJ)hdd.o
 	ar rcs $@ $^
+
+#---создание файлов *.o---
+$(CU): $(DIR_SRC)CU.c
+	$(CC) $(DIR_SRC)CU.c -lm -Wall -Werror -o $(CU)
+
+$(ALU): $(DIR_SRC)ALU.c
+	$(CC) $(DIR_SRC)ALU.c -Wall -Werror -o $(ALU)
 
 #---вывод на экран---
 #display

@@ -107,7 +107,7 @@ int sc_commandDecode(int value, int* command, int* operand)
         && !(temp_command >= JUMP && temp_command <= HALT)
         && !(temp_command >= NOT && temp_command <= SUBCC)) 
         || temp_operand < 0 
-        || temp_operand > 127) return 1;
+        || temp_operand > 127) return -1;
 
     *command = temp_command;
     *operand = temp_operand; 
