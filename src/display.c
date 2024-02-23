@@ -127,7 +127,7 @@ int main()
     {
         rk_readkey(&key);
         key_convert(key);
-        //show_GUI(bg_color, fg_color);
+        show_GUI(bg_color, fg_color);
     } while (key != KEY_quit);
 
     mt_clrscr();

@@ -30,7 +30,11 @@ int fREAD(int operand)
 
 int fWRITE(int operand)
 {
-
+    int value;
+    char buffer[13];
+    sc_memoryGet(operand, &value);
+    sprintf(buffer, "Value:> %d", value);
+    mt_printtoterm(buffer);
 
     return 0;
 }
@@ -87,11 +91,7 @@ int CU()
 {
     int value, command, operand;
     sc_memoryGet(instructionCounter, &value);
-    if (value == 0)
-    {
-        mt_gotoXY(100, 100);
-        mt_printtoterm("Value:>");
-    }
+
     if (sc_commandDecode(value, &command, &operand) == -1)
     {
         sc_regSet(INVALID_COMMAND, 1);
@@ -136,7 +136,7 @@ int CU()
         }
     }
 
-    show_GUI(bg_color, fg_color);
+    //show_GUI(bg_color, fg_color);
 
     return 0;
 }
