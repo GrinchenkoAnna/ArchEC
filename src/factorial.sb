@@ -1,0 +1,8 @@
+10 REM Вычисление факториала N
+20 INPUT N
+30 F=1
+40 F=F*N
+50 N=N-1
+60 IF N>1 GOTO 40
+70 OUTPUT F
+80 END
