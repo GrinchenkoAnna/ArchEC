@@ -1,9 +1,11 @@
 #ifndef SHOW_GUI_H
 #define SHOW_GUI_H
 
+#include <math.h>
+
 #include "myTerm.c"
 #include "myBigChars.c"
-#include "library.c"
+//#include "library.c"
 
 void print_memory(dye, dye);
 void print_accumulator();

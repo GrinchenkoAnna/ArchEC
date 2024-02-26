@@ -1,7 +1,7 @@
 #ifndef ALU_H
 #define ALU_H
 
-//#include "display.c"
+#include "library.c"
 
 int ALU(int command, int operand);
 

@@ -95,16 +95,16 @@ $(HDD): $(DIR_OBJ)hdd.o
 
 #---создание файлов *.o---
 $(CU): $(DIR_SRC)CU.c
-	$(CC) $(DIR_SRC)CU.c -lm -Wall -Werror -o $(CU)
+	$(CC) $(CFLAGS) -lm $< -o $@
 
 $(ALU): $(DIR_SRC)ALU.c
-	$(CC) $(DIR_SRC)ALU.c -Wall -Werror -o $(ALU)
+	$(CC) $(CFLAGS) $< -o $@
 
 $(DIR_OBJ)Signal.o: $(DIR_SRC)Signal.c
 	$(CC) -Wall -Werror -o $(DIR_OBJ)Signal.o
 
 $(DIR_OBJ)show_GUI.o: $(DIR_SRC)show_GUI.c
-	$(CC) -lm -Wall -Werror -o $(DIR_OBJ)show_GUI.o
+	$(CC) $(DIR_SRC)show_GUI.c -lm -Wall -Werror -o $(DIR_OBJ)show_GUI.o
 
 #---вывод на экран---
 #display
