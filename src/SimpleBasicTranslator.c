@@ -102,6 +102,18 @@ void GOTO(int number_of_command) //-> JUMP - Переход к указанно�
 
 void IF(char *args)
 {
+    // поиск условия
+    for (int i = 0; i < strlen(args); i++)
+    {
+        if (args[i] == '>' || args[i] == '<' || args[i] == '=')
+        {
+
+        }
+    }
+
+    char* expression = (char*)malloc(sizeof(char)*256);
+    expression = strtok(args, ""); //expression = args?
+    char* item = strtok(expression, " ");
 
 }
 
@@ -145,10 +157,10 @@ void translate_basic_to_assembler()
             // проверка?
             factorial[i].number = number;
 
-            part = strtok(line_to_split, " ");
+            part = strtok(line_to_split, " "); // 1-NULL?
             char* _command = part;
 
-            part = strtok(line_to_split, " ");
+            part = strtok(line_to_split, " "); // 1-NULL?
             char* args = part;
 
             // определение команды, переход на функции, которые надо реализовать
