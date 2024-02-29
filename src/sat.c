@@ -36,6 +36,18 @@ void translate_assembler_to_binary_format(const char* factorial_filename_binary)
         address_numeric = atoi(address);
 
         command = strtok(NULL, " ");
+        for (int i = 0; i < strlen(command); i++)
+        {
+            if (command[i] == 32)
+            {
+                command[i] = '\0';
+                for (int j = i; j < strlen(command) - i; j++)
+                { command[i] = '\0'; }
+            }
+        }
+
+        //printf("line: %d command: %s\n", i + 1, command);
+
         if (strcmp(command, "READ") == 0) { command_numeric = READ; }
         else if (strcmp(command, "WRITE") == 0) { command_numeric = WRITE; }
         else if (strcmp(command, "LOAD") == 0) { command_numeric = LOAD; }
@@ -51,33 +63,39 @@ void translate_assembler_to_binary_format(const char* factorial_filename_binary)
         else if (strcmp(command, "=") == 0)
         {
             operand = strtok(NULL, " +");
+            //printf("operand = %s\n", operand);
             operand_numeric = atoi(operand);
             sc_memorySet(address_numeric, operand_numeric);
+            //printf("line %d memory set\n", i + 1);
             continue;
         }
         else
         {
-            fprintf(stderr, "%d: unexpected command\ntranslation breaked", i + 1);
+            fprintf(stderr, "%d: unexpected command. Translation breaked\n", i + 1);
             break;
         }
 
         operand = strtok(NULL, " ");
-        if (operand != NULL && operand[0] != ';')
+        //printf("operand = %s\n", operand);
+        if (operand == NULL && operand[0] != ';')
         {
-            fprintf(stderr, "%d: unexpected operand\ntranslation breaked", i + 1);
+            fprintf(stderr, "%d: unexpected operand. translation breaked\n", i + 1);
             break;
         }
         operand_numeric = atoi(operand);
 
         if (sc_commandEncode(command_numeric, operand_numeric, &value) == -1)
         {
-            fprintf(stderr, "%d: encoding error\ntranslation breaked", i + 1);
+            fprintf(stderr, "%d: encoding error. translation breaked\n", i + 1);
             break;
         }
         sc_memorySet(address_numeric, value);
+        //printf("line %d memory set\n", i + 1);
     }
-
+    //printf("file processed\n");
     sc_memorySave(strdup(factorial_filename_binary)); // const char* -> char*
+    //printf("file saved\n");
+    printf("file saving result is %d", sc_memorySave(strdup(factorial_filename_binary)));
 }
 
 

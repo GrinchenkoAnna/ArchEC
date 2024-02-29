@@ -44,39 +44,16 @@ void key_convert(enum keys key)
             break;
 
         case KEY_F5:
-            // read(terminal, &buffer, sizeof(buffer));
-
-            // if (buffer[0] == '-')
-            // {
-            //     accumulator = atoi(buffer + 1);
-            //     if (accumulator > 0) { accumulator *= -1; }
-            // }
-            // else if (buffer[0] == '+' || buffer[0] == '0' || buffer[0] == '1' ||
-            //          buffer[0] == '2' || buffer[0] == '3' || buffer[0] == '4' ||
-            //          buffer[0] == '5' || buffer[0] == '6' || buffer[0] == '7' ||
-            //          buffer[0] == '8' || buffer[0] == '9')
-            // {
-            //     if (buffer[0] == '+') { accumulator = atoi(buffer + 1); }
-            //     else { accumulator = atoi(buffer); }
-
-            //     if (accumulator < 0) { accumulator *= -1; }
-            // }
-
-            // if (accumulator > 9999 || accumulator < -9999)
-            // {
-            //     sc_regSet(OPERATION_OVERFLOW, 1);
-            //     if (accumulator > 0) { accumulator = 9999; }
-            //     else { accumulator = -9999; }
-            // }
-            // else { sc_regSet(OPERATION_OVERFLOW, 0); }
-            accumulator = sc_memory[instructionCounter];
+            accumulator = sc_memory[instructionCounter]; //так?
 
             break;
 
         case KEY_F6:
+            instructionCounter = sc_memory[instructionCounter]; //так?
             break;
 
         case KEY_enter:
+            // убрать?
             break;
 
         case KEY_default:

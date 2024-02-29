@@ -30,9 +30,11 @@ HDD_TEST = $(DIR_BIN)hdd_test
 CU = $(DIR_BIN)CU
 ALU = $(DIR_BIN)ALU
 
-.PHONY: all library myterm mybchars myreadkey display hdd cu alu clean test
+SAT = sat
 
-all: library myterm mybchars myreadkey display hdd
+.PHONY: all library myterm mybchars myreadkey display hdd cu alu sat clean test
+
+all: library myterm mybchars myreadkey display hdd cu alu sat
 library: $(LIBRARY)
 myterm: $(MYTERM)
 mybchars: $(MYBIGCHARS)
@@ -41,15 +43,15 @@ display: $(DISPLAY)
 hdd: $(HDD)
 cu: $(CU)
 alu: $(ALU)
+sat: $(SAT)
 clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
-	$(HDD) $(DIR_OBJ)*.o \
+	$(HDD) $(DIR_OBJ)/* \
 	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(MYREADKEY_TEST) \
 	$(HDD_TEST) $(DIR_TEST_OBJ)*.o \
-	$(DIR_TEMP) \
-	$(DIR_BIN)* \
+	$(DIR_TEMP) $(DIR_BIN)* \
 	$(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
-	$(DIR_TEST_SRC)*.o
+	$(DIR_TEST_SRC)*.o sat
 test: test-lib test-myterm test-mybchars test-myreadkey test-hdd
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)
@@ -94,6 +96,12 @@ $(HDD): $(DIR_OBJ)hdd.o
 	ar rcs $@ $^
 
 #---создание файлов *.o---
+$(DIR_OBJ)sat.o: $(DIR_SRC)sat.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(SAT): $(DIR_OBJ)sat.o $(DIR_OBJ)library.a
+	$(CC) $(DIR_OBJ)sat.o $(DIR_OBJ)library.a -Wall -Werror -o $(SAT)
+
 $(CU): $(DIR_SRC)CU.c
 	$(CC) $(CFLAGS) -lm $< -o $@
 
@@ -101,7 +109,7 @@ $(ALU): $(DIR_SRC)ALU.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(DIR_OBJ)Signal.o: $(DIR_SRC)Signal.c
-	$(CC) -Wall -Werror -o $(DIR_OBJ)Signal.o
+	$(CC) $(DIR_SRC)Signal.c -Wall -Werror -o $(DIR_OBJ)Signal.o
 
 $(DIR_OBJ)show_GUI.o: $(DIR_SRC)show_GUI.c
 	$(CC) $(DIR_SRC)show_GUI.c -lm -Wall -Werror -o $(DIR_OBJ)show_GUI.o
