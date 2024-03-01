@@ -1,7 +1,7 @@
 #ifndef CU_H
 #define CU_H
 
-#include "ALU.c"
+//#include "ALU.c"
 #include "show_GUI.c"
 
 int CU();

@@ -17,6 +17,9 @@ void key_convert(enum keys key)
         {
         case KEY_l:
             sc_memoryLoad(filename);
+            printf("\nloaded\n");
+            //fprintf(stderr, "\nloaded\n");
+            //show_GUI(bg_color, fg_color);
             break;
 
         case KEY_s:
@@ -26,30 +29,36 @@ void key_convert(enum keys key)
         case KEY_up:
             if (instructionCounter - 10 >= 0) { instructionCounter -= 10; }
             else { instructionCounter += 90; }
+            //show_GUI(bg_color, fg_color);
             break;
 
         case KEY_down:
             if (instructionCounter + 10 <= 99) { instructionCounter += 10; }
             else { instructionCounter -= 90; }
+            //show_GUI(bg_color, fg_color);
             break;
 
         case KEY_left:
             if (instructionCounter - 1 >= 0) { instructionCounter--; }
             else { instructionCounter = 99; }
+            //show_GUI(bg_color, fg_color);
             break;
 
         case KEY_right:
             if (instructionCounter + 1 <= 99) { instructionCounter++; }
             else { instructionCounter = 0; }
+            //show_GUI(bg_color, fg_color);
             break;
 
         case KEY_F5:
             accumulator = sc_memory[instructionCounter]; //так?
+            //show_GUI(bg_color, fg_color);
 
             break;
 
         case KEY_F6:
             instructionCounter = sc_memory[instructionCounter]; //так?
+            //show_GUI(bg_color, fg_color);
             break;
 
         case KEY_enter:
@@ -67,7 +76,7 @@ void key_convert(enum keys key)
     {            
         sc_regSet(IGNORING_CLOCK_PULSES, 0);
         timerHandler(SIGALRM);
-        //show_GUI(bg_color, fg_color);
+        show_GUI(bg_color, fg_color);
     }
 
     else if (key == KEY_t)
@@ -85,8 +94,8 @@ int main()
 {
     enum keys key;    
 
-    sc_memorySet(26, 2020);
-    sc_memorySave(filename);
+    //sc_memorySet(26, 2020);
+    //sc_memorySave(filename);
     sc_memoryInit();
     sc_regInit();
 

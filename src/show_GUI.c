@@ -197,5 +197,5 @@ void show_GUI(dye bg_color, dye fg_color)
     print_keys();
     print_bigChar(instructionCounter, bg_color, fg_color);
 
-    //mt_gotoXY(32, 0);
+    mt_gotoXY(32, 0);
 }

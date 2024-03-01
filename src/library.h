@@ -62,7 +62,7 @@ short instructionCounter = 0;
 int accumulator = 0;
 int sc_memory[MEMORY_SIZE];
 //файл для загрузки/записи содержимого памяти
-char filename[] = "src/sc_memory_file.txt";
+char filename[] = "src/factorial.o";
 
 int sc_memoryInit();
 int sc_memorySet(int, int);

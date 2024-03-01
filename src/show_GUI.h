@@ -5,7 +5,7 @@
 
 #include "myTerm.c"
 #include "myBigChars.c"
-//#include "library.c"
+#include "ALU.c"
 
 void print_memory(dye, dye);
 void print_accumulator();
