@@ -2,19 +2,21 @@
 
 int ALU(int command, int operand)
 {
+    int value;
+    sc_memoryGet(operand, &value);
     switch (command)
     {
     case ADD:
-        accumulator += operand; break;
+        accumulator += value; break;
 
     case SUB:
-        accumulator -= operand; break;
+        accumulator -= value; break;
 
     case DIVIDE:
-        if(operand != 0)
+        if(value != 0)
         {
             sc_regSet(DIVISION_BY_ZERO, 0);
-            accumulator /= operand;
+            accumulator /= value;
         }
         else
         {
@@ -24,7 +26,7 @@ int ALU(int command, int operand)
         break;
 
     case MUL:
-        accumulator *= operand; break;
+        accumulator *= value; break;
     }
 
     return 0;

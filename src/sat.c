@@ -95,7 +95,7 @@ void translate_assembler_to_binary_format(const char* factorial_filename_binary)
     //printf("file processed\n");
     sc_memorySave(strdup(factorial_filename_binary)); // const char* -> char*
     //printf("file saved\n");
-    printf("file saving result is %d",                  sc_memorySave(strdup(factorial_filename_binary)));
+    //printf("file saving result is %d\n",                  sc_memorySave(strdup(factorial_filename_binary)));
 }
 
 

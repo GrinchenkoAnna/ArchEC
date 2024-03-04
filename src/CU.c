@@ -2,10 +2,10 @@
 
 int fREAD(int operand)
 {
-    mt_gotoXY(24, 0);
+    mt_gotoXY(26, 0);
 
-    mt_printtoterm("Value:>");
-    char buffer[2];
+    mt_printtoterm("Value:< ");
+    char buffer[8];
     mt_readfromterm(buffer, sizeof(buffer));
 
     int value;
@@ -23,7 +23,7 @@ int fREAD(int operand)
          else { value = atoi(buffer); }
     }
 
-    sc_memorySet(instructionCounter, value);
+    sc_memorySet(operand, value);
 
     return 0;
 }
@@ -31,9 +31,10 @@ int fREAD(int operand)
 int fWRITE(int operand)
 {
     int value;
-    char buffer[13];
+    char buffer[16];
     sc_memoryGet(operand, &value);
     sprintf(buffer, "Value:> %d", value);
+    mt_gotoXY(26, 0);
     mt_printtoterm(buffer);
 
     return 0;
@@ -82,7 +83,7 @@ int fHALT()
 {
     sc_regSet(IGNORING_CLOCK_PULSES, 1);
     instructionCounter = 0;
-    show_GUI(bg_color, fg_color);
+    //show_GUI(bg_color, fg_color);
 
     return 0;
 }

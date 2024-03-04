@@ -1,5 +1,7 @@
 #include "show_GUI.h"
 
+short start = 0;
+
 dye fg_color;
 dye bg_color;
 
@@ -64,12 +66,12 @@ void print_operation()
     mt_gotoXY(8, 69);
 
     int value;
-    sc_memoryGet(0, &value);
+    sc_memoryGet(instructionCounter, &value);
     if (value > 0)
     {
         int command, operand;
         sc_commandDecode(value, &command, &operand);
-        printf("+%.2x : %.2x", command, operand);
+        printf("+%.2d : %.2d", command, operand);
     }
     else { printf("+00 : 00"); }
 }
@@ -185,7 +187,12 @@ void print_bigChar(int memory_address, dye bg_color, dye fg_color)
 
 void show_GUI(dye bg_color, dye fg_color)
 {
-    mt_clrscr();
+    if (!start)
+    {
+        mt_clrscr();
+        start = 1;
+    }
+
     mt_setbgcolor(bg_color);
     mt_setfgcolor(fg_color);
 

@@ -30,4 +30,6 @@ void timerHandler(int signo)
     else if (instructionCounter >= 99) { instructionCounter = 0; }
 
     if (value == 0) { alarm(1); }
+
+    show_GUI(bg_color, fg_color);
 }
