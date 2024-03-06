@@ -1,6 +1,6 @@
 #include "show_GUI.h"
 
-short start = 0;
+//short start = 0;
 
 dye fg_color;
 dye bg_color;
@@ -187,11 +187,7 @@ void print_bigChar(int memory_address, dye bg_color, dye fg_color)
 
 void show_GUI(dye bg_color, dye fg_color)
 {
-    if (!start)
-    {
-        mt_clrscr();
-        start = 1;
-    }
+    mt_clrscr();
 
     mt_setbgcolor(bg_color);
     mt_setfgcolor(fg_color);

@@ -67,7 +67,7 @@ void key_convert(enum keys key)
     {            
         sc_regSet(IGNORING_CLOCK_PULSES, 0);
         timerHandler(SIGALRM);
-        show_GUI(bg_color, fg_color);
+        //show_GUI(bg_color, fg_color);
     }
 
     else if (key == KEY_t)
@@ -89,6 +89,7 @@ int main()
     sc_regInit();
 
     set_signals();
+    raise(SIGUSR1);
 
     rk_mytermsave();
     rk_mytermregime(1, 0, 0, 1, 1);

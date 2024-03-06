@@ -31,11 +31,11 @@ int fREAD(int operand)
 int fWRITE(int operand)
 {
     int value;
-    char buffer[16];
+    //char buffer[16];
     sc_memoryGet(operand, &value);
-    sprintf(buffer, "Value:> %d", value);
+    //sprintf(buffer, "Value:> %d", value);
     mt_gotoXY(26, 0);
-    mt_printtoterm(buffer);
+    mt_printtoterm("Value:>");
 
     return 0;
 }
