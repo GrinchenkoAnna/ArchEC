@@ -10,7 +10,8 @@ void load_program_factorial(const char* factorial_filename_sAssembler)
 {
     if ((factorial_sAssembler = fopen(factorial_filename_sAssembler, "r")) == NULL)
     {
-        fprintf(stderr, "%s cannot be found or opened\n", factorial_filename_sAssembler);
+        fprintf(stderr, "%s cannot be found or opened\n",
+                factorial_filename_sAssembler);
         exit(EXIT_FAILURE);
     }
 }
@@ -23,7 +24,11 @@ void translate_assembler_to_binary_format(const char* factorial_filename_binary)
         if (!fgets(line_to_split, 256, factorial_sAssembler))
         {
             if (feof(factorial_sAssembler)) { break; }
-            else { fprintf(stderr, "line %d of programm cannot be read\n", i + 1); }
+            else
+            {
+                fprintf(stderr, "line %d of programm cannot be read\n", i + 1);
+                exit(EXIT_FAILURE);
+            }
         }
 
      // 1) string      2) string converted to a number
@@ -72,22 +77,22 @@ void translate_assembler_to_binary_format(const char* factorial_filename_binary)
         else
         {
             fprintf(stderr, "%d: unexpected command. Translation breaked\n", i + 1);
-            break;
+            exit(EXIT_FAILURE);
         }
 
         operand = strtok(NULL, " ");
         //printf("operand = %s\n", operand);
         if (operand == NULL && operand[0] != ';')
         {
-            fprintf(stderr, "%d: unexpected operand. translation breaked\n", i + 1);
-            break;
+            fprintf(stderr, "%d: unexpected operand. Translation breaked\n", i + 1);
+            exit(EXIT_FAILURE);
         }
         operand_numeric = atoi(operand);
 
         if (sc_commandEncode(command_numeric, operand_numeric, &value) == -1)
         {
-            fprintf(stderr, "%d: encoding error. translation breaked\n", i + 1);
-            break;
+            fprintf(stderr, "%d: encoding error. Translation breaked\n", i + 1);
+            exit(EXIT_FAILURE);
         }
         sc_memorySet(address_numeric, value);
         //printf("line %d memory set\n", i + 1);

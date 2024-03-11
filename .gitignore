@@ -2,3 +2,5 @@
 .vscode
 .metadata
 temp.txt
+*.a
+bin/display
