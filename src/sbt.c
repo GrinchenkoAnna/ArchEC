@@ -61,6 +61,7 @@ char getVarName (int value) //создать новую переменную, з
                     variables[varCounter].address);
             exit(EXIT_FAILURE);
         }
+        variables[varCounter].value = 0;
     }
     else
     {
@@ -87,7 +88,7 @@ int getVarValue (char name) //найти значение ячейки памя�
                 variables[varCounter].address);
         exit(EXIT_FAILURE);
     }
-
+    variables[varCounter].value = 0;
 
     return variables[varCounter].value;
 }
@@ -108,7 +109,7 @@ int getVarAddress(char name) //найти номер ячейки памяти, 
                 variables[varCounter].address);
         exit(EXIT_FAILURE);
     }
-
+    variables[varCounter].value = 0;
 
     return variables[varCounter].address;
 }
@@ -178,16 +179,26 @@ void IF(char *args) //добавить обработку пробелов
     char* expression = strtok(args, "");
 
     char* op1 = strtok(expression, sign);
-    //переменная, содержит в названии более 1 символа или ее название состоит не из буквы верхнего регистра
-    if ((op1[0] >= 'A' && op1[0] <= 'Z') || (op1[1] != ' ' || op1[1] != '\0'))
+    //переменная
+    if (atoi(op1) == 0 && (op1[0] >= 'A' && op1[0] <= 'Z'))
     {
-        fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", op1);
+        //переменная содержит в названии более 1 символа
+        if (op1[1] != ' ' || op1[1] != '\0')
+        {
+            fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", op1);
+            exit(EXIT_FAILURE);
+        }
+        getVarValue(op1[0]);
+    }
+    //число
+    else if (atoi(op1) != 0 && (op1[0] >= '0' && op1[0] <= '9'))
+        { op1[0] = getVarName(atoi(op1)); }
+    //другое
+    else
+    {
+        fprintf(stderr, "cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", op1);
         exit(EXIT_FAILURE);
     }
-    //переменная
-    if (atoi(op1) == 0 && (op1[0] >= 'A' && op1[0] <= 'Z')) { getVarValue(op1[0]); }
-    //число
-    else if (atoi(op1) != 0) { op1[0] = getVarName(atoi(op1)); }
 
     //первое вхождение в expression знака сравнения
     char sign_of_comparision;
@@ -198,17 +209,26 @@ void IF(char *args) //добавить обработку пробелов
     }
 
     char* op2 = expression + strlen(op1) + 1;
-    if (op2[0] == ' ')
-    //переменная, содержит в названии более 1 символа или ее название состоит не из буквы верхнего регистра
-    if ((op2[0] >= 'A' && op2[0] <= 'Z') || (op2[1] != ' ' || op2[1] != '\0'))
+    //переменная
+    if (atoi(op2) == 0 && (op2[0] >= 'A' && op2[0] <= 'Z'))
     {
-        fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", op2);
+        //переменная содержит в названии более 1 символа или ее название состоит не из буквы верхнего регистра
+        if (op2[1] != ' ' || op2[1] != '\0')
+        {
+            fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", op2);
+            exit(EXIT_FAILURE);
+        }
+        getVarValue(op2[0]);
+    }
+    //число
+    else if (atoi(op2) != 0 && (op1[0] >= '0' && op1[0] <= '9'))
+        { op2[0] = getVarName(atoi(op2)); }
+    //другое
+    else
+    {
+        fprintf(stderr, "cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", op2);
         exit(EXIT_FAILURE);
     }
-    //переменная
-    if (atoi(op2) == 0 && (op2[0] >= 'A' && op2[0] <= 'Z')) { getVarValue(op2[0]); }
-    //число
-    else if (atoi(op2) != 0) { op2[0] = getVarName(atoi(op2)); }
 
     char* then = strtok(args, " "); //пока обработка только GOTO
     if (strstr(then, "GOTO") != NULL)
@@ -272,7 +292,99 @@ void IF(char *args) //добавить обработку пробелов
 
 void LET(char* args)
 {
+    char separator[4] = { ' ', '=', '>', '<' };
 
+    char* variable = strtok(args, separator);
+    if (!(variable[0] >= 'A' && variable[0] <= 'Z'))
+    {
+        fprintf(stderr, "%s cannot be a variable name. Translation breaked\n", variable);
+        exit(EXIT_FAILURE);
+    }
+    else if ((variable[0] >= 'A' && variable[0] <= 'Z')
+        || (variable[1] != ' ' || variable[1] != '\0'))
+    {
+        fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", variable);
+        exit(EXIT_FAILURE);
+    }
+    getVarValue(variable[0]);
+
+    char* assignment_part = strtok(NULL, separator);
+    //переменная
+    if (atoi(assignment_part) == 0 && (assignment_part[0] >= 'A' && assignment_part[0] <= 'Z'))
+    {
+        if (assignment_part[1] != ' ' || assignment_part[1] != '\0')
+        {
+            fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", assignment_part);
+        exit(EXIT_FAILURE);
+        }
+        getVarValue(assignment_part[0]);
+        char operator[4] = { '+', '-', '*', '/' };
+        //LET var = выражение([переменная] +,-,* или / [другая переменная или число])
+        // ******************* //
+        // БЕЗ СКОБОК!!! Добавить
+        // ******************* //
+        char* op1 = strtok(assignment_part, operator);
+
+        char sign_of_operator;
+        for (int i = 0; i < 4; i++)
+        {
+            if (strchr(assignment_part, operator[i]) != NULL)
+                { sign_of_operator = *strchr(assignment_part, operator[i]); }
+        }
+
+        char* op2 = assignment_part + strlen(op1) + 1;
+
+        //обработка выражения
+        fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+                    commandCounterSA, getVarAddress(op1[0]));
+        commandCounterSA++;
+
+        switch (sign_of_operator)
+        {
+        case '+':
+            fprintf(factorial_sAssembler, "%.2d ADD %d\n",
+                    commandCounterSA, getVarAddress(op2[0]));
+            break;
+
+        case '-':
+            fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+                    commandCounterSA, getVarAddress(op2[0]));
+            break;
+
+        case '*':
+            fprintf(factorial_sAssembler, "%.2d MUL %d\n",
+                    commandCounterSA, getVarAddress(op2[0]));
+            break;
+
+        case '/':
+            fprintf(factorial_sAssembler, "%.2d DIVIDE %d\n",
+                    commandCounterSA, getVarAddress(op2[0]));
+            break;
+
+        default:
+            fprintf(stderr, "cannot recognize operator sign: %c. Translation breaked\n", sign_of_operator);
+            exit(EXIT_FAILURE);
+            break; //нужно ли?
+        }
+        commandCounterSA++;
+
+        fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+                    commandCounterSA, getVarAddress(variable[0]));
+        commandCounterSA++;
+    }
+    //число
+    else if (atoi(assignment_part) != 0 && (assignment_part[0] >= '0' && assignment_part[0] <= '9'))
+    {
+        //LET variable = число
+        fprintf(factorial_sAssembler, "%.2d = +%.4d\n",
+                getVarAddress(variable[0]), atoi(assignment_part));
+    }
+    //другое
+    else
+    {
+        fprintf(stderr, "cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", assignment_part);
+        exit(EXIT_FAILURE);
+    }
 }
 
 void END() { fprintf(factorial_sAssembler, "%.2i HALT 00\n", commandCounterSA); }
