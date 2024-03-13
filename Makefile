@@ -31,8 +31,9 @@ CU = $(DIR_BIN)CU
 ALU = $(DIR_BIN)ALU
 
 SAT = sat
+SBT = sbt
 
-.PHONY: all library myterm mybchars myreadkey display hdd cu alu sat clean test
+.PHONY: all library myterm mybchars myreadkey display hdd cu alu sat sbt clean test
 
 all: library myterm mybchars myreadkey display hdd cu alu sat
 library: $(LIBRARY)
@@ -44,6 +45,7 @@ hdd: $(HDD)
 cu: $(CU)
 alu: $(ALU)
 sat: $(SAT)
+sbt: $(SBT)
 clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
 	$(HDD) $(DIR_OBJ)/* \
@@ -51,7 +53,7 @@ clean:
 	$(HDD_TEST) $(DIR_TEST_OBJ)*.o \
 	$(DIR_TEMP) $(DIR_BIN)* \
 	$(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
-	$(DIR_TEST_SRC)*.o sat
+	$(DIR_TEST_SRC)*.o sat sbt
 test: test-lib test-myterm test-mybchars test-myreadkey test-hdd
 test-lib: $(LIBRARY_TEST)
 test-myterm: $(MYTERM_TEST)
@@ -99,8 +101,14 @@ $(HDD): $(DIR_OBJ)hdd.o
 $(DIR_OBJ)sat.o: $(DIR_SRC)sat.c
 	$(CC) $(CFLAGS) $< -o $@
 
+$(DIR_OBJ)sbt.o: $(DIR_SRC)sbt.c
+	$(CC) $(CFLAGS) $< -o $@
+
 $(SAT): $(DIR_OBJ)sat.o $(DIR_OBJ)library.a
 	$(CC) $(DIR_OBJ)sat.o $(DIR_OBJ)library.a -Wall -Werror -o $(SAT)
+
+$(SBT): $(DIR_OBJ)sbt.o $(DIR_OBJ)library.a
+	$(CC) $(DIR_OBJ)sbt.o $(DIR_OBJ)library.a -Wall -Werror -o $(SBT)
 
 $(CU): $(DIR_SRC)CU.c
 	$(CC) $(CFLAGS) -lm $< -o $@

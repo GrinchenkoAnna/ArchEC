@@ -13,7 +13,7 @@ char variable_name = 'A'; //всего 26
 struct command
 {
     int number;  // Номер команды SB
-    char* instruction;
+    char instruction[128];
     int address; // адрес ячейки памяти, содержащей команду
 };
 struct command* program;
@@ -36,12 +36,14 @@ void load_program_factorial(const char* factorial_filename_sBasic,
 {
     if ((factorial_sBasic = fopen(factorial_filename_sBasic, "r")) == NULL)
     {
-        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n",
-                factorial_filename_sBasic);
+        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n", factorial_filename_sBasic);
         exit(EXIT_FAILURE);
     }
-
-    factorial_sAssembler = fopen (factorial_filename_sAssembler, "w");
+    if ((factorial_sAssembler = fopen (factorial_filename_sAssembler, "w")) == NULL)
+    {
+        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n", factorial_filename_sAssembler);
+        exit(EXIT_FAILURE);
+    }
 }
 
 char getVarName (int value) //создать новую переменную, задать значение, адрес и вернуть имя
@@ -114,22 +116,23 @@ int getVarAddress(char name) //найти номер ячейки памяти, 
     return variables[varCounter].address;
 }
 
-void REM(char* args)
+void REM(int i, char* args)
 {
 
 }
 
-void INPUT(char* args) // -> READ - Ввод с терминала в указанную ячейку памяти
+void INPUT(int i, char* args) // -> READ - Ввод с терминала в указанную ячейку памяти
 {
     if (!(args[0] >= 'A' && args[0] <= 'Z'))
     {
-        fprintf(stderr, "%s cannot be a variable name. Translation breaked\n", args);
+        fprintf(stderr, "line %d: %s cannot be a variable name. Translation breaked\n", i, args);
         exit(EXIT_FAILURE);
-    }
-    else if (args[1] != ' ' || args[1] != '\0')
-    {
-        fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", args);
-        exit(EXIT_FAILURE);
+
+        if (strlen(args) != 1)
+        {
+            fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i,  args);
+            exit(EXIT_FAILURE);
+        }
     }
 
     fprintf(factorial_sAssembler, "%.2d READ %d\n", commandCounterSA, getVarAddress(args[0]));
@@ -137,17 +140,18 @@ void INPUT(char* args) // -> READ - Ввод с терминала в указа
     commandCounterSA++;
 }
 
-void PRINT(char* args) // -> WRITE - Вывод на терминал значение указанной ячейки памяти
+void PRINT(int i, char* args) // -> WRITE - Вывод на терминал значение указанной ячейки памяти
 {
     if (!(args[0] >= 'A' && args[0] <= 'Z'))
     {
-        fprintf(stderr, "%s cannot be a variable name. Translation breaked\n", args);
+        fprintf(stderr, "line %d: %s cannot be a variable name. Translation breaked\n", i, args);
         exit(EXIT_FAILURE);
-    }
-    else if (args[1] != ' ' || args[1] != '\0')
-    {
-        fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", args);
-        exit(EXIT_FAILURE);
+
+        if (strlen(args) != 1)
+        {
+            fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i,  args);
+            exit(EXIT_FAILURE);
+        }
     }
 
     fprintf(factorial_sAssembler, "%.2d WRITE %d\n",
@@ -156,7 +160,7 @@ void PRINT(char* args) // -> WRITE - Вывод на терминал значе
     commandCounterSA++;
 }
 
-void GOTO(int number_of_command) //-> JUMP - Переход к указанному адресу памяти
+void GOTO(int i, int number_of_command) //-> JUMP - Переход к указанному адресу памяти
 {
     for (int i = 0; i < commandCounterSB; i++)
     {
@@ -172,61 +176,62 @@ void GOTO(int number_of_command) //-> JUMP - Переход к указанно�
 
 //if args=(expression then)
 //expression: op1 sign_of_comparision op2
-void IF(char *args) //добавить обработку пробелов
+void IF(int i, char *args) //добавить обработку пробелов
 {
     char sign[3] = { '>', '=', '<' };
 
     char* expression = strtok(args, "");
+
+    //первое вхождение в expression знака сравнения
+    char sign_of_comparision;
+    for (int j = 0; j < strlen(expression); j++)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (expression[j] == sign[i])
+            { sign_of_comparision = expression[j]; }
+        }
+    }
 
     char* op1 = strtok(expression, sign);
     //переменная
     if (atoi(op1) == 0 && (op1[0] >= 'A' && op1[0] <= 'Z'))
     {
         //переменная содержит в названии более 1 символа
-        if (op1[1] != ' ' || op1[1] != '\0')
+        if (strlen(op1) != 1)
         {
-            fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", op1);
+            fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i, op1);
             exit(EXIT_FAILURE);
         }
         getVarValue(op1[0]);
     }
     //число
-    else if (atoi(op1) != 0 && (op1[0] >= '0' && op1[0] <= '9'))
-        { op1[0] = getVarName(atoi(op1)); }
+    else if (op1[0] >= '0' && op1[0] <= '9') { op1[0] = getVarName(atoi(op1)); }
     //другое
     else
     {
-        fprintf(stderr, "cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", op1);
+        fprintf(stderr, "line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, op1);
         exit(EXIT_FAILURE);
-    }
-
-    //первое вхождение в expression знака сравнения
-    char sign_of_comparision;
-    for (int i = 0; i < 3; i++)
-    {
-        if (strchr(expression, sign[i]) != NULL)
-            { sign_of_comparision = *strchr(expression, sign[i]); }
     }
 
     char* op2 = expression + strlen(op1) + 1;
     //переменная
     if (atoi(op2) == 0 && (op2[0] >= 'A' && op2[0] <= 'Z'))
     {
-        //переменная содержит в названии более 1 символа или ее название состоит не из буквы верхнего регистра
-        if (op2[1] != ' ' || op2[1] != '\0')
+        //переменная содержит в названии более 1 символа
+        if (strlen(op2) != 1)
         {
-            fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", op2);
+            fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i, op2);
             exit(EXIT_FAILURE);
         }
         getVarValue(op2[0]);
     }
     //число
-    else if (atoi(op2) != 0 && (op1[0] >= '0' && op1[0] <= '9'))
-        { op2[0] = getVarName(atoi(op2)); }
+    else if (op2[0] >= '0' && op2[0] <= '9') { op2[0] = getVarName(atoi(op2)); }
     //другое
     else
     {
-        fprintf(stderr, "cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", op2);
+        fprintf(stderr, "line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, op2);
         exit(EXIT_FAILURE);
     }
 
@@ -284,53 +289,52 @@ void IF(char *args) //добавить обработку пробелов
         break;
 
     default:
-        fprintf(stderr, "cannot recognize comparision sign: %c. Translation breaked\n", sign_of_comparision);
+        fprintf(stderr, "line %d: cannot recognize comparision sign: %c. Translation breaked\n", i, sign_of_comparision);
         exit(EXIT_FAILURE);
         break; //нужно ли?
     }
 }
 
-void LET(char* args)
+void LET(int i, char* args)
 {
     char separator[4] = { ' ', '=', '>', '<' };
 
     char* variable = strtok(args, separator);
     if (!(variable[0] >= 'A' && variable[0] <= 'Z'))
     {
-        fprintf(stderr, "%s cannot be a variable name. Translation breaked\n", variable);
+        fprintf(stderr, "line %d: %s cannot be a variable name. Translation breaked\n", i, variable);
         exit(EXIT_FAILURE);
-    }
-    else if ((variable[0] >= 'A' && variable[0] <= 'Z')
-        || (variable[1] != ' ' || variable[1] != '\0'))
-    {
-        fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", variable);
-        exit(EXIT_FAILURE);
+
+        if (strlen(variable) != 1)
+        {
+            fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i, variable);
+            exit(EXIT_FAILURE);
+        }
     }
     getVarValue(variable[0]);
 
     char* assignment_part = strtok(NULL, separator);
-    //переменная
+    //переменная или выражение
     if (atoi(assignment_part) == 0 && (assignment_part[0] >= 'A' && assignment_part[0] <= 'Z'))
     {
-        if (assignment_part[1] != ' ' || assignment_part[1] != '\0')
-        {
-            fprintf(stderr, "a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", assignment_part);
-        exit(EXIT_FAILURE);
-        }
-        getVarValue(assignment_part[0]);
         char operator[4] = { '+', '-', '*', '/' };
+
         //LET var = выражение([переменная] +,-,* или / [другая переменная или число])
         // ******************* //
         // БЕЗ СКОБОК!!! Добавить
         // ******************* //
-        char* op1 = strtok(assignment_part, operator);
 
         char sign_of_operator;
-        for (int i = 0; i < 4; i++)
+        for (int j = 0; j < strlen(assignment_part); j++)
         {
-            if (strchr(assignment_part, operator[i]) != NULL)
-                { sign_of_operator = *strchr(assignment_part, operator[i]); }
+            for (int i = 0; i < 4; i++)
+            {
+                if (assignment_part[j] == operator[i])
+                { sign_of_operator = assignment_part[j]; }
+            }
         }
+
+        char* op1 = strtok(assignment_part, operator);
 
         char* op2 = assignment_part + strlen(op1) + 1;
 
@@ -362,7 +366,7 @@ void LET(char* args)
             break;
 
         default:
-            fprintf(stderr, "cannot recognize operator sign: %c. Translation breaked\n", sign_of_operator);
+            fprintf(stderr, "line %d: cannot recognize operator sign: %c. Translation breaked\n", i, sign_of_operator);
             exit(EXIT_FAILURE);
             break; //нужно ли?
         }
@@ -382,7 +386,7 @@ void LET(char* args)
     //другое
     else
     {
-        fprintf(stderr, "cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", assignment_part);
+        fprintf(stderr, "line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, assignment_part);
         exit(EXIT_FAILURE);
     }
 }
@@ -392,11 +396,11 @@ void END() { fprintf(factorial_sAssembler, "%.2i HALT 00\n", commandCounterSA); 
 void translate_basic_to_assembler()
 {
     instructionCounter = 0;
+    char line[128];
     while (1) //подсчет команд = кол-ва строк в файле
     {
-        char line[256];
-        fgets(line, 255, factorial_sBasic);
         if (feof(factorial_sBasic)) { break; }
+        fgets(line, 127, factorial_sBasic);
         instructionCounter++;
     }
     if (instructionCounter > 99)
@@ -407,37 +411,45 @@ void translate_basic_to_assembler()
     }
     commandCounterSB = instructionCounter;
 
+    fseek(factorial_sBasic, 0, SEEK_SET);
 
     program = (struct command*)malloc(sizeof(struct command)*instructionCounter);
     for (int i = 0; i < instructionCounter; i++)
     {
-        program[i].instruction = (char*)malloc(sizeof(char)*128); //выделение памяти под команду
-        if (!fgets(program[i].instruction, 127, factorial_sBasic)) //чтение в структуру
-        { fprintf(stderr, "line %d of programm cannot be read. Translation breaked\n", i++); }
-
-        for (int i = 0; i < instructionCounter; i++)
+        if (fgets(program[i].instruction, 127, factorial_sBasic) == NULL) //чтение в структуру
         {
-            char *line_to_split = (char*)malloc(sizeof(char)*128);
-            sprintf(line_to_split, "%s", program[i].instruction);
+            if (feof(factorial_sBasic)) { break; }
+            fprintf(stderr, "line %d of programm cannot be read. Translation breaked\n", i++);
+            exit(EXIT_FAILURE);
+        }
+    }
 
-            program[i].number = atoi(strtok(line_to_split, " "));
-            char* function = strtok(NULL, " ");
-            char* args = strtok(NULL, " ");
+    for (int i = 0; i < instructionCounter; i++)
+    {
+        char line_to_split[128];
+        sprintf(line_to_split, "%s", program[i].instruction);
 
-            if (strcmp(function, "REM") == 0) { REM(args); }
-            else if (strcmp(function, "UNPUT") == 0) { INPUT(args); }
-            else if (strcmp(function, "PRINT") == 0) { PRINT(args); }
-            else if (strcmp(function, "GOTO") == 0) { GOTO(atoi(args)); }
-            else if (strcmp(function, "IF") == 0) { IF(args); }
-            else if (strcmp(function, "LET") == 0) { }
-            else if (strcmp(function, "END") == 0) { END(); }
-            else
-            {
-                fprintf(stderr, "unexpected command: %d %s %s. Translation breaked\n",
-                        program[i].number, function, args);
-                exit(EXIT_FAILURE);
-            }
+        program[i].number = atoi(strtok(line_to_split, " "));
+        char* function = strtok(NULL, " ");
+        if (function[0] == 'E' && function[1] == 'N' && function[2] == 'D')
+        {
+            END();
+            return;
+        }
 
+        char* args = strtok(NULL, " ");
+
+        if (strcmp(function, "REM") == 0) { REM(i+1, args); }
+        else if (strcmp(function, "INPUT") == 0) { INPUT(i+1, args); }
+        else if (strcmp(function, "PRINT") == 0) { PRINT(i+1, args); }
+        else if (strcmp(function, "GOTO") == 0) { GOTO(i+1, atoi(args)); }
+        else if (strcmp(function, "IF") == 0) { IF(i+1, args); }
+        else if (strcmp(function, "LET") == 0) { LET(i+1, args); }
+        else
+        {
+            fprintf(stderr, "line %d: unexpected command: \"%s\". Translation breaked\n",
+                    i+1, function);
+            exit(EXIT_FAILURE);
         }
     }
 }
