@@ -28,7 +28,7 @@ struct var variables[99];
 
 int commandCounterSA = 0; // номер команды Simple Assembler
 int commandCounterSB = 0;
-int varCounter = 0;
+int varCounter = -1;
 
 
 void load_program_factorial(const char* factorial_filename_sBasic,
@@ -63,7 +63,9 @@ char getVarName (int value) //создать новую переменную, з
                     variables[varCounter].address);
             exit(EXIT_FAILURE);
         }
-        variables[varCounter].value = 0;
+        variables[varCounter].value = value;
+        fprintf(factorial_sAssembler, "%.2d = +%.4d\n",
+                variables[varCounter].address, variables[varCounter].value);
     }
     else
     {
@@ -116,10 +118,7 @@ int getVarAddress(char name) //найти номер ячейки памяти, 
     return variables[varCounter].address;
 }
 
-void REM(int i, char* args)
-{
-
-}
+void REM(int i, char* args) { }
 
 void INPUT(int i, char* args) // -> READ - Ввод с терминала в указанную ячейку памяти
 {
@@ -160,14 +159,36 @@ void PRINT(int i, char* args) // -> WRITE - Вывод на терминал з�
     commandCounterSA++;
 }
 
-void GOTO(int i, int number_of_command) //-> JUMP - Переход к указанному адресу памяти
+void GOTO(int i, char option, int number_of_command) //-> JUMP - Переход к указанному адресу памяти
 {
     for (int i = 0; i < commandCounterSB; i++)
     {
         if (program[i].number == number_of_command)
         {
-            fprintf(factorial_sAssembler, "%.2d JUMP %d\n",
+            switch(option)
+            {
+            case '<':
+            case '>':
+                fprintf(factorial_sAssembler, "%.2d JNEG %d\n",
+                        commandCounterSA, program[i].address);
+                break;
+
+            case '=':
+                fprintf(factorial_sAssembler, "%.2d JZ %d\n",
+                        commandCounterSA, program[i].address);
+                break;
+
+            case '0':
+                fprintf(factorial_sAssembler, "%.2d JUMP %d\n",
                     commandCounterSA, program[i].address);
+                break;
+
+            default:
+                fprintf(stderr, "line %d: cannot recognize goto condition. Translation breaked\n", i);
+                exit(EXIT_FAILURE);
+                break; //?
+            }
+
             commandCounterSA++;
             return;
         }
@@ -180,7 +201,8 @@ void IF(int i, char *args) //добавить обработку пробело�
 {
     char sign[3] = { '>', '=', '<' };
 
-    char* expression = strtok(args, "");
+    char expression[strlen(args) + 1];
+    strcpy(expression, args);
 
     //первое вхождение в expression знака сравнения
     char sign_of_comparision;
@@ -193,7 +215,7 @@ void IF(int i, char *args) //добавить обработку пробело�
         }
     }
 
-    char* op1 = strtok(expression, sign);
+    char* op1 = strtok(args, sign);
     //переменная
     if (atoi(op1) == 0 && (op1[0] >= 'A' && op1[0] <= 'Z'))
     {
@@ -235,13 +257,15 @@ void IF(int i, char *args) //добавить обработку пробело�
         exit(EXIT_FAILURE);
     }
 
-    char* then = strtok(args, " "); //пока обработка только GOTO
-    if (strstr(then, "GOTO") != NULL)
-    {
-        goto_cell[goto_instruction] = atoi(strtok(then, " "));
-        goto_instruction++;
-    }
-    else { }
+    char* then = strtok(expression, " "); //пока обработка только GOTO, еще нужно обработать присвоение значения переменной
+    /* if (strstr(then, "GOTO") != NULL) */
+    /* { */
+    /*     goto_cell[goto_instruction] = atoi(strtok(then, " ")); */
+    /*     goto_instruction++; */
+    /* } */
+    /* else { } */
+    while (strstr(then, "GOTO") == NULL) { then = strtok(NULL, " "); }
+    then = strtok(NULL, " ");
 
     //обработка условия
     switch (sign_of_comparision)
@@ -254,10 +278,11 @@ void IF(int i, char *args) //добавить обработку пробело�
         fprintf(factorial_sAssembler, "%.2d SUB %d\n",
                 commandCounterSA, getVarAddress(op2[0]));
         commandCounterSA++;
+        GOTO(i, '<', atoi(then));
 
-        fprintf(factorial_sAssembler, "%.2d JNEG %d\n",
-                commandCounterSA, goto_cell[goto_instruction]);
-        commandCounterSA++;
+        /* fprintf(factorial_sAssembler, "%.2d JNEG %d\n", */
+        /*         commandCounterSA, goto_cell[goto_instruction]); */
+        /* commandCounterSA++; */
         break;
 
     case '>':
@@ -268,10 +293,11 @@ void IF(int i, char *args) //добавить обработку пробело�
         fprintf(factorial_sAssembler, "%.2d SUB %d\n",
                 commandCounterSA, getVarAddress(op1[0]));
         commandCounterSA++;
+        GOTO(i, '>', atoi(then));
 
-        fprintf(factorial_sAssembler, "%.2d JNEG %d\n",
-                commandCounterSA, goto_cell[goto_instruction]);
-        commandCounterSA++;
+        /* fprintf(factorial_sAssembler, "%.2d JNEG %d\n", */
+        /*         commandCounterSA, goto_cell[goto_instruction]); */
+        /* commandCounterSA++; */
         break;
 
     case '=':
@@ -282,10 +308,11 @@ void IF(int i, char *args) //добавить обработку пробело�
         fprintf(factorial_sAssembler, "%.2d SUB %d\n",
                 commandCounterSA, getVarAddress(op2[0]));
         commandCounterSA++;
+        GOTO(i, '=', atoi(then));
 
-        fprintf(factorial_sAssembler, "%.2d JZ %d\n",
-                commandCounterSA, goto_cell[goto_instruction]);
-        commandCounterSA++;
+        /* fprintf(factorial_sAssembler, "%.2d JZ %d\n", */
+        /*         commandCounterSA, goto_cell[goto_instruction]); */
+        /* commandCounterSA++; */
         break;
 
     default:
@@ -313,7 +340,7 @@ void LET(int i, char* args)
     }
     getVarValue(variable[0]);
 
-    char* assignment_part = strtok(NULL, separator);
+    char* assignment_part = strtok(NULL, " ");
     //переменная или выражение
     if (atoi(assignment_part) == 0 && (assignment_part[0] >= 'A' && assignment_part[0] <= 'Z'))
     {
@@ -330,13 +357,52 @@ void LET(int i, char* args)
             for (int i = 0; i < 4; i++)
             {
                 if (assignment_part[j] == operator[i])
-                { sign_of_operator = assignment_part[j]; }
+                { sign_of_operator = assignment_part[j];}
             }
         }
 
         char* op1 = strtok(assignment_part, operator);
+        //переменная
+        if (atoi(op1) == 0 && (op1[0] >= 'A' && op1[0] <= 'Z'))
+        {
+            //переменная содержит в названии более 1 символа
+            if (strlen(op1) != 1)
+            {
+                fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i, op1);
+                exit(EXIT_FAILURE);
+            }
+            getVarValue(op1[0]);
+        }
+        //число
+        else if (op1[0] >= '0' && op1[0] <= '9') { op1[0] = getVarName(atoi(op1)); }
+        //другое
+        else
+        {
+            fprintf(stderr, "line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, op1);
+            exit(EXIT_FAILURE);
+        }
 
         char* op2 = assignment_part + strlen(op1) + 1;
+        op2 = strtok(op2, "\n");
+        //переменная
+        if (atoi(op2) == 0 && (op2[0] >= 'A' && op2[0] <= 'Z'))
+        {
+            //переменная содержит в названии более 1 символа
+            if (strlen(op2) != 1)
+            {
+                fprintf(stderr, "line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i, op2);
+                exit(EXIT_FAILURE);
+            }
+            getVarValue(op2[0]);
+        }
+        //число
+        else if (op2[0] >= '0' && op2[0] <= '9') { op2[0] = getVarName(atoi(op2)); }
+        //другое
+        else
+        {
+            fprintf(stderr, "line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, op2);
+            exit(EXIT_FAILURE);
+        }
 
         //обработка выражения
         fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
@@ -422,14 +488,18 @@ void translate_basic_to_assembler()
             fprintf(stderr, "line %d of programm cannot be read. Translation breaked\n", i++);
             exit(EXIT_FAILURE);
         }
+        program[i].address = i;
+        sprintf(line, "%s", program[i].instruction);
+        program[i].number = atoi(strtok(line, " "));
     }
 
     for (int i = 0; i < instructionCounter; i++)
     {
-        char line_to_split[128];
-        sprintf(line_to_split, "%s", program[i].instruction);
+        sprintf(line, "%s", program[i].instruction);
 
-        program[i].number = atoi(strtok(line_to_split, " "));
+        /* program[i].number = atoi(strtok(line_to_split, " ")); */
+        /* printf("program[i].number = %d\n", program[i].number); */
+        strtok(line, " ");
         char* function = strtok(NULL, " ");
         if (function[0] == 'E' && function[1] == 'N' && function[2] == 'D')
         {
@@ -437,12 +507,12 @@ void translate_basic_to_assembler()
             return;
         }
 
-        char* args = strtok(NULL, " ");
+        char* args = strtok(NULL, "");
 
         if (strcmp(function, "REM") == 0) { REM(i+1, args); }
         else if (strcmp(function, "INPUT") == 0) { INPUT(i+1, args); }
         else if (strcmp(function, "PRINT") == 0) { PRINT(i+1, args); }
-        else if (strcmp(function, "GOTO") == 0) { GOTO(i+1, atoi(args)); }
+        else if (strcmp(function, "GOTO") == 0) { GOTO(i+1, '0', atoi(args)); }
         else if (strcmp(function, "IF") == 0) { IF(i+1, args); }
         else if (strcmp(function, "LET") == 0) { LET(i+1, args); }
         else
