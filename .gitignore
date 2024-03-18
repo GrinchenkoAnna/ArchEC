@@ -7,3 +7,4 @@ bin/display
 *.a
 bin/display
 src/factorial1.sa
+bin/display
