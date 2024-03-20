@@ -374,6 +374,8 @@ void LET(int i, char* args)
 //expression: op1 sign_of_comparision op2
 void IF(int i, char *args)
 {
+    int spaces = 2;
+
     char sign[4] = { '>', '=', '<', ' ' };
 
     char expression[strlen(args) + 1];
@@ -388,7 +390,12 @@ void IF(int i, char *args)
         for (int i = 0; i < 3; i++)
         {
             if (args[j] == sign[i])
-            { sign_of_comparision = args[j]; }
+            {
+                sign_of_comparision = args[j];
+                if (args[j - 1] == ' ') { spaces++; }
+                if (args[j + 1] == ' ') { spaces++; }
+                break;
+            }
         }
     }
 
@@ -417,6 +424,8 @@ void IF(int i, char *args)
 
     //второй операнд в выражении
     char* op2 = expression + strlen(op1) + 1;
+    while ((op2[0] == sign[0]) || (op2[0] == sign[1]) || (op2[0] == sign[2]) || (op2[0] == sign[3]))
+    { op2++; }
     op2 = strtok(op2, " ");
     //переменная
     if (atoi(op2) == 0 && (op2[0] >= 'A' && op2[0] <= 'Z'))
@@ -438,7 +447,8 @@ void IF(int i, char *args)
         exit(EXIT_FAILURE);
     }
 
-    char* result = then + strlen(op1) + 1 + strlen(op2) + 1;
+    char* result = then + strlen(op1) + strlen(op2) + spaces;
+    printf("result = %s\n", result);
 
     if (strstr(result, "GOTO") != NULL)
     {
