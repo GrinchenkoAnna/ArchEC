@@ -123,7 +123,6 @@ int getVarAddress(char name) //найти номер ячейки памяти, 
                 variables[varCounter].address);
         exit(EXIT_FAILURE);
     }
-    variables[varCounter].value = 0;
 
     return variables[varCounter].address;
 }
@@ -378,7 +377,9 @@ void IF(int i, char *args)
     char sign[4] = { '>', '=', '<', ' ' };
 
     char expression[strlen(args) + 1];
+    char then[strlen(args) + 1];
     strcpy(expression, args);
+    strcpy(then, args);
 
     //первое вхождение в expression знака сравнения
     char sign_of_comparision;
@@ -392,7 +393,8 @@ void IF(int i, char *args)
     }
 
     //первый операнд в выражении
-    char* op1 = strtok(args, sign);
+    char* op1 = strtok(args, " ");
+    op1 = strtok(op1, sign);
     //переменная
     if (atoi(op1) == 0 && (op1[0] >= 'A' && op1[0] <= 'Z'))
     {
@@ -414,8 +416,8 @@ void IF(int i, char *args)
     }
 
     //второй операнд в выражении
-    char* op2 = expression + strlen(op1);
-    op2 = strtok(op2, sign);
+    char* op2 = expression + strlen(op1) + 1;
+    op2 = strtok(op2, " ");
     //переменная
     if (atoi(op2) == 0 && (op2[0] >= 'A' && op2[0] <= 'Z'))
     {
@@ -436,15 +438,12 @@ void IF(int i, char *args)
         exit(EXIT_FAILURE);
     }
 
-    char* then = expression;
+    char* result = then + strlen(op1) + 1 + strlen(op2) + 1;
 
-    /*strstr ищет первое вхождение подстроки GOTO в строке then.
-     * Возвращает указатель на первое вхождение строки GOTO в строку then,
-     * или пустой указатель, если строка GOTO не является частью строки then*/
-    if (strstr(then, "GOTO") == NULL)
+    if (strstr(result, "GOTO") != NULL)
     {
-        do { then = strtok(NULL, " "); }
-        while (strstr(then, "GOTO"));
+        while (result[0] == ' ' || result[0] == 'G' || result[0] == 'O' || result[0] == 'T')
+        { result++; }
 
         //обработка условия
         switch (sign_of_comparision)
@@ -457,7 +456,7 @@ void IF(int i, char *args)
             fprintf(factorial_sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
             commandCounterSA++;
-            GOTO(i, '<', atoi(then));
+            GOTO(i, '<', atoi(result));
             break;
 
         case '>':
@@ -468,7 +467,7 @@ void IF(int i, char *args)
             fprintf(factorial_sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
             commandCounterSA++;
-            GOTO(i, '>', atoi(then));
+            GOTO(i, '>', atoi(result));
             break;
 
         case '=':
@@ -479,7 +478,7 @@ void IF(int i, char *args)
             fprintf(factorial_sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
             commandCounterSA++;
-            GOTO(i, '=', atoi(then));
+            GOTO(i, '=', atoi(result));
             break;
 
         default:
@@ -488,7 +487,8 @@ void IF(int i, char *args)
             break; //нужно ли?
         }
     }
-    else { LET(i, then); } //иначе идет присвоение значения какой-либо переменной
+    //иначе идет присвоение значения какой-либо переменной
+    else { LET(i, result); }
 }
 
 void END() { fprintf(factorial_sAssembler, "%.2i HALT 00\n", commandCounterSA); }
@@ -522,17 +522,11 @@ void translate_basic_to_assembler()
             fprintf(stderr, "line %d of programm cannot be read. Translation breaked\n", i++);
             exit(EXIT_FAILURE);
         }
-        program[i].address = i;
+        program[i].address = commandCounterSA;
         sprintf(line, "%s", program[i].instruction);
         program[i].number = atoi(strtok(line, " "));
-    }
-
-    for (int i = 0; i < instructionCounter; i++)
-    {
         sprintf(line, "%s", program[i].instruction);
 
-        /* program[i].number = atoi(strtok(line_to_split, " ")); */
-        /* printf("program[i].number = %d\n", program[i].number); */
         strtok(line, " ");
         char* function = strtok(NULL, " ");
         if (function[0] == 'E' && function[1] == 'N' && function[2] == 'D')
