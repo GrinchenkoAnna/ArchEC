@@ -474,6 +474,8 @@ void LET(int i, char* args)
             fprintf(factorial_sAssembler, "%.2d STORE %d\n",
                         commandCounterSA, getVarAddress(variable[0]));
             commandCounterSA++;
+
+            return;
         }
         else
         {
@@ -571,6 +573,8 @@ void LET(int i, char* args)
         fprintf(stderr, "LET: line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, assignment_part);
         exit(EXIT_FAILURE);
     }
+
+    complicated = 0;
 }
 
 //if args=(expression then)
