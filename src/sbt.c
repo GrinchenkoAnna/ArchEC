@@ -14,12 +14,14 @@ FILE* factorial_sBasic = NULL;
 FILE* factorial_sAssembler = NULL;
 
 char variable_name = 'Z'; //всего 26
-int varCounter = -1; //количество переменных
 
-int commandCounterSA = 0; //номер команды Simple Assembler
-int commandCounterSB = 0; //номер команды Simple Basic
+int commandCounterSA = 0; // номер команды Simple Assembler
+int commandCounterSB = 0;
+int varCounter = -1;
 
-int depth = 0; //для выражений со скобками
+int getVarValue (char name);
+int getVarAddress(char name);
+char getVarName (int value);
 
 struct command //команды Simple Basic
 {
@@ -42,6 +44,194 @@ typedef struct NODE
     char data;
     struct NODE* next;
 } node;
+
+typedef struct Node
+{
+    char data;
+    struct Node* next;
+} node;
+
+void push(char data, node** head)
+{
+    node* temp = (node*)malloc(sizeof(node));
+    temp->data = data;
+    temp->next = *head;
+    *head = temp;
+}
+
+char pop(node** head)
+{
+    node* temp;
+    char data;
+
+    if (*head == NULL)
+    {
+        fprintf(stderr, "error in pop function: *head == NULL\n");
+        exit(EXIT_FAILURE);
+    }
+
+    temp = *head;
+    *head = temp->next;
+    data = temp->data;
+    free(temp);
+
+    return data;
+}
+
+char top(node* head) { return head->data; }
+
+int get_priority(char sign)
+{
+    switch (sign)
+    {
+    case '+':
+    case '-':
+        return 1;
+
+    case '*':
+    case '/':
+        return 2;
+
+    case '(':
+    case ')':
+        return 3;
+
+    default:
+        return 0;
+    }
+}
+
+char* translate_to_RPN(char* args, char* rpn)
+{
+    node* head = NULL;
+    int rpn_index = 0;
+    int i = 0;
+
+    while (args[i] != '\n' && args[i] != '\0')
+    {
+        char temp = args[i];
+
+        if ((temp >= 'A' && temp <= 'Z') || (temp >= '0' && temp <= '9')) //переменная или число
+        {
+            rpn[rpn_index] = temp;
+            rpn_index++;
+        }
+        else if (temp == '(') { push(temp, &head); }
+        else if (temp == ')')
+        {
+            while (top(head) != '(')
+            {
+                char temp1 = pop(&head);
+                rpn[rpn_index] = temp1;
+                rpn_index++;
+                if (head == NULL)
+                {
+                    fprintf(stderr, "impossible to find paired brackets in the expression %s. Translation breaked\n", args);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            pop(&head);
+        }
+        else if (temp == '+' || temp == '-' || temp == '*' || temp == '/')
+        {
+            while (head != NULL && get_priority(head->data) >= get_priority(temp) && head->data != '(')
+            {
+                char temp2 = pop(&head);
+                rpn[rpn_index] = temp2;
+                rpn_index++;
+            }
+            push(temp, &head);
+        }
+        else { i++; continue; }
+        i++;
+    }
+
+    while (head != NULL)
+    {
+        char temp = pop(&head);
+        rpn[rpn_index] = temp;
+        rpn_index++;
+    }
+    rpn[rpn_index] = '\0';
+
+    return rpn;
+}
+
+void calculate_RPN(int j, char* rpn) //запуталась
+{
+    int i = 0;
+
+    while (rpn[i] != '\0')
+    {
+        if (rpn[i] >= 'A' && rpn[i] <= 'Z')
+        {
+            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+                        commandCounterSA, getVarAddress(rpn[i]));
+            commandCounterSA++;
+
+            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+                        commandCounterSA, 99 - varCounter);
+            commandCounterSA++;
+
+            varCounter++;
+        }
+        else if (rpn[i] >= '0' && rpn[i] <= '9')
+        {
+            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+                        commandCounterSA, getVarAddress(getVarName(rpn[i])));
+            commandCounterSA++;
+
+            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+                        commandCounterSA, 99 - varCounter);
+            commandCounterSA++;
+
+            varCounter++;
+        }
+        else
+        {
+            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+                        commandCounterSA, 99 - varCounter + 1);
+            commandCounterSA++;
+
+            switch (rpn[i])
+            {
+            case '+':
+                fprintf(factorial_sAssembler, "%.2d ADD %d\n",
+                        commandCounterSA, 99 - varCounter + 2);
+                commandCounterSA++;
+                break;
+
+            case '-':
+                fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+                        commandCounterSA, 99 - varCounter + 2);
+                commandCounterSA++;
+                break;
+
+            case '*':
+                fprintf(factorial_sAssembler, "%.2d MUL %d\n",
+                        commandCounterSA, 99 - varCounter + 2);
+                commandCounterSA++;
+                break;
+
+            case '/':
+                fprintf(factorial_sAssembler, "%.2d DIVIDE %d\n",
+                        commandCounterSA, 99 - varCounter + 2);
+                commandCounterSA++;
+                break;
+
+            default:
+                fprintf(stderr, "cannot calculate string %s in %c. Translation breaked\n", rpn, rpn[i]);
+                exit(EXIT_FAILURE);
+            }
+
+            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+                        commandCounterSA, 99 - varCounter + 2);
+            commandCounterSA++;
+            varCounter--;
+        }
+        i++;
+    }
+}
 
 void load_program_factorial(const char* factorial_filename_sBasic,
                             const char* factorial_filename_sAssembler)
@@ -223,7 +413,9 @@ void GOTO(int i, char option, int number_of_command) //-> JUMP - Переход 
 void LET(int i, char* args)
 {
     char separator[5] = { '=', '>', '<', ' ' };
+    char operator[4] = { '+', '-', '*', '/'};
     int assignment_part_position;
+    int complicated = 0;
 
     //подсчет: где начинается часть задания значения переменной
     for (assignment_part_position = 0; assignment_part_position < strlen(args); assignment_part_position++)
@@ -249,16 +441,22 @@ void LET(int i, char* args)
     }
     getVarValue(variable[0]);
 
-    //обработка присваемого выражения
-    //переменная или выражение
-    if (atoi(assignment_part) == 0 && (assignment_part[0] >= 'A' && assignment_part[0] <= 'Z'))
+    //будет ли сложное выражение
+    //
+    for (int j = 0; j < strlen(assignment_part); j++)
     {
-        char operator[4] = { '+', '-', '*', '/'};
+        for (int i = 0; i < 4; i++)
+        {
+            if (assignment_part[j] == operator[i]
+                || assignment_part[j] == '(' || assignment_part[j] == ')')
+            { complicated++; }
+        }
+    }
 
-        // ******************* //
-        // БЕЗ СКОБОК!!! Добавить
-        // ******************* //
-
+    //обработка присваемого выражения
+    //переменная или простое выражение
+    if (atoi(assignment_part) == 0 && (assignment_part[0] >= 'A' && assignment_part[0] <= 'Z') && complicated < 2)
+    {
         //операция между операндами
         char sign_of_operator;
         for (int j = 0; j < strlen(assignment_part); j++)
@@ -298,7 +496,7 @@ void LET(int i, char* args)
             fprintf(factorial_sAssembler, "%.2d STORE %d\n",
                         commandCounterSA, getVarAddress(variable[0]));
             commandCounterSA++;
-            commandCounterSA++;
+            return;
         }
         else
         {
@@ -377,11 +575,17 @@ void LET(int i, char* args)
         }
     }
     //число
-    else if (atoi(assignment_part) != 0 && (assignment_part[0] >= '0' && assignment_part[0] <= '9'))
+    else if (atoi(assignment_part) != 0 && (assignment_part[0] >= '0' && assignment_part[0] <= '9') && complicated < 2)
     {
-        //LET variable = число
         fprintf(factorial_sAssembler, "%.2d = +%.4d\n",
                 getVarAddress(variable[0]), atoi(assignment_part));
+    }
+    //выражение со скобками
+    else if (complicated >=2)
+    {
+        char rpn[strlen(assignment_part) + 1];
+        translate_to_RPN(assignment_part, rpn);
+        calculate_RPN(i,  rpn);
     }
     //другое
     else
@@ -389,6 +593,8 @@ void LET(int i, char* args)
         fprintf(stderr, "LET: line %d: cannot recognize not a symbol, nor a digit in line \"%s\". Translation breaked\n", i, assignment_part);
         exit(EXIT_FAILURE);
     }
+
+    complicated = 0;
 }
 
 //if args=(expression then)
@@ -635,12 +841,6 @@ void translate_basic_to_assembler()
         else if (strcmp(function, "LET") == 0) { LET(i+1, args); }
     }
 }
-
-// argc - количество аргументов командной строки, которые переданы приложению
-// sbt файл.sb файл.sa - 3 аргумента, argc = 3
-// argv - указатель на массив строк, который представляет переданный набор аргументов
-//
-// если не передано ни одного аргумента, argc = 1, argv[0] - имя исполняемого файла
 
 int main (int argc, const char** argv)
 {

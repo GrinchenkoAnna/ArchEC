@@ -15,13 +15,9 @@ void key_convert(enum keys key)
     {
         switch (key)
         {
-        case KEY_l:
-            sc_memoryLoad(filename);
-            break;
+        case KEY_l: sc_memoryLoad(filename); break;
 
-        case KEY_s:
-            sc_memorySave(filename);
-            break;        
+        case KEY_s: sc_memorySave(filename); break;
 
         case KEY_up:
             if (instructionCounter - 10 >= 0) { instructionCounter -= 10; }
@@ -43,56 +39,44 @@ void key_convert(enum keys key)
             else { instructionCounter = 0; }
             break;
 
-        case KEY_F5:
-            accumulator = sc_memory[instructionCounter];
+        case KEY_F5: accumulator = sc_memory[instructionCounter]; break;
 
-            break;
-
-        case KEY_F6:
-            instructionCounter = sc_memory[instructionCounter];
-            break;
+        case KEY_F6: instructionCounter = sc_memory[instructionCounter]; break;
 
         case KEY_enter:
             // убрать?
             break;
 
-        case KEY_default:
-            printf("Unknown command\n");
-            break;
+        case KEY_default: printf("Unknown command\n"); break;
 
         default: break;
         }
     }
     if (key == KEY_r)
-    {            
+    {
+        show_GUI(bg_color, fg_color);
         sc_regSet(IGNORING_CLOCK_PULSES, 0);
         timerHandler(SIGALRM);
-        //show_GUI(bg_color, fg_color);
     }
 
     else if (key == KEY_t)
     {
         sc_regSet(IGNORING_CLOCK_PULSES, 1);
         timerHandler(SIGALRM);
-        //show_GUI(bg_color, fg_color);
     }
 
     else if (key == KEY_i) { raise(SIGUSR1); }       
 }
 
-
 int main()
 {
-    enum keys key;    
-
-    sc_memoryInit();
-    sc_regInit();
+    enum keys key;
 
     set_signals();
     raise(SIGUSR1);
 
     rk_mytermsave();
-    rk_mytermregime(1, 0, 0, 1, 1);
+    //rk_mytermregime(1, 0, 0, 1, 1);
 
     fg_color = WHITE;
     bg_color = BLACK; 
