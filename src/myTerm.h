@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-typedef enum colors 
+typedef enum colors
 {
   BLACK = 30,
   RED,        //31
@@ -32,5 +32,7 @@ int mt_getscreensize(int*, int*);
 int mt_setfgcolor(dye);
 int mt_setbgcolor(dye);
 int mt_resetcolor();
+void mt_enter_alt_charset_mode();
+void mt_exit_alt_charset_mode();
 
 #endif

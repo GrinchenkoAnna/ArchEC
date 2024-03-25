@@ -1,7 +1,5 @@
 #include "show_GUI.h"
 
-//short start = 0;
-
 dye fg_color;
 dye bg_color;
 
@@ -53,9 +51,7 @@ void print_instructionCounter()
     mt_gotoXY(4, 63);
     printf(" instructionCounter ");
     mt_gotoXY(5, 71);
-    if (instructionCounter >= 0) { printf("+"); }
-    else { printf("-"); }
-    printf("%.4d", instructionCounter);
+    printf("+%.4d", instructionCounter);
 }
 
 void print_operation()
@@ -180,7 +176,7 @@ void print_bigChar(int memory_address, dye bg_color, dye fg_color)
 
             default: break;
         }
-        mt_gotoXY(25 + i, 0);
+        //mt_gotoXY(25 + i, 0);
         value %= (int)pow(10, 3-i);
     }
 }
@@ -200,5 +196,6 @@ void show_GUI(dye bg_color, dye fg_color)
     print_keys();
     print_bigChar(instructionCounter, bg_color, fg_color);
 
-    mt_gotoXY(32, 0);
+    mt_printtoterm("\n");
+    mt_printtoterm("\E(B");
 }

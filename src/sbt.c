@@ -112,6 +112,11 @@ char* translate_to_RPN(char* args, char* rpn)
                 char temp1 = pop(&head);
                 rpn[rpn_index] = temp1;
                 rpn_index++;
+                if (head == NULL)
+                {
+                    fprintf(stderr, "impossible to find paired brackets in the expression %s. Translation breaked\n", args);
+                    exit(EXIT_FAILURE);
+                }
             }
             pop(&head);
         }
@@ -146,7 +151,6 @@ void calculate_RPN(int j, char* rpn) //запуталась
 
     while (rpn[i] != '\0')
     {
-        printf("rpn[i] = %c\n", rpn[i]);
         if (rpn[i] >= 'A' && rpn[i] <= 'Z')
         {
             fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
@@ -420,17 +424,20 @@ void LET(int i, char* args)
     }
     getVarValue(variable[0]);
 
+    //будет ли сложное выражение
+    //
     for (int j = 0; j < strlen(assignment_part); j++)
     {
         for (int i = 0; i < 4; i++)
         {
-            if (assignment_part[j] == operator[i])
+            if (assignment_part[j] == operator[i]
+                || assignment_part[j] == '(' || assignment_part[j] == ')')
             { complicated++; }
         }
     }
 
     //обработка присваемого выражения
-    //переменная или выражение
+    //переменная или простое выражение
     if (atoi(assignment_part) == 0 && (assignment_part[0] >= 'A' && assignment_part[0] <= 'Z') && complicated < 2)
     {
         //операция между операндами
@@ -553,7 +560,6 @@ void LET(int i, char* args)
     //число
     else if (atoi(assignment_part) != 0 && (assignment_part[0] >= '0' && assignment_part[0] <= '9') && complicated < 2)
     {
-        //LET variable = число
         fprintf(factorial_sAssembler, "%.2d = +%.4d\n",
                 getVarAddress(variable[0]), atoi(assignment_part));
     }
@@ -563,9 +569,6 @@ void LET(int i, char* args)
         char rpn[strlen(assignment_part) + 1];
         translate_to_RPN(assignment_part, rpn);
         calculate_RPN(i,  rpn);
-        //LET variable = число
-        /* fprintf(factorial_sAssembler, "%.2d = +%.4d\n", */
-        /*         getVarAddress(variable[0]), getVarValue()); */
     }
     //другое
     else
@@ -767,12 +770,6 @@ void translate_basic_to_assembler()
         }
     }
 }
-
-// argc - количество аргументов командной строки, которые переданы приложению
-// sbt файл.sb файл.sa - 3 аргумента, argc = 3
-// argv - указатель на массив строк, который представляет переданный набор аргументов
-//
-// если не передано ни одного аргумента, argc = 1, argv[0] - имя исполняемого файла
 
 int main (int argc, const char** argv)
 {

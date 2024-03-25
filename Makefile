@@ -43,9 +43,6 @@ myreadkey: $(MYREADKEY)
 display: $(DISPLAY)
 hdd: $(HDD)
 cu: $(CU)
-alu: $(ALU)
-sat: $(SAT)
-sbt: $(SBT)
 clean:
 	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
 	$(HDD) $(DIR_OBJ)/* \
@@ -97,18 +94,12 @@ $(DIR_OBJ)hdd.o: $(DIR_SRC)hdd.c
 $(HDD): $(DIR_OBJ)hdd.o
 	ar rcs $@ $^
 
-#---создание файлов *.o---
-$(DIR_OBJ)sat.o: $(DIR_SRC)sat.c
-	$(CC) $(CFLAGS) $< -o $@
+#---прочее---
+$(SAT): $(DIR_SRC)sat.c
+	$(CC) $(DIR_SRC)sat.c -Wall -Werror -o $(SAT)
 
-$(DIR_OBJ)sbt.o: $(DIR_SRC)sbt.c
-	$(CC) $(CFLAGS) $< -o $@
-
-$(SAT): $(DIR_OBJ)sat.o $(DIR_OBJ)library.a
-	$(CC) $(DIR_OBJ)sat.o $(DIR_OBJ)library.a -Wall -Werror -o $(SAT)
-
-$(SBT): $(DIR_OBJ)sbt.o $(DIR_OBJ)library.a
-	$(CC) $(DIR_OBJ)sbt.o $(DIR_OBJ)library.a -Wall -Werror -o $(SBT)
+$(SBT): $(DIR_SRC)sbt.c
+	$(CC) $(DIR_SRC)sbt.c -Wall -Werror -o $(SBT)
 
 $(CU): $(DIR_SRC)CU.c
 	$(CC) $(CFLAGS) -lm $< -o $@

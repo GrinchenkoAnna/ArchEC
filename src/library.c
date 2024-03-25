@@ -35,7 +35,6 @@ int sc_memorySave(char* filename)
     if ((sc_memory_file = fopen(filename, "wb")) == NULL) return -1;
     fwrite(sc_memory, sizeof(int), MEMORY_SIZE, sc_memory_file);
     fclose(sc_memory_file);
-
     return 0;
 }
 

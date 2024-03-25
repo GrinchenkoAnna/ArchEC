@@ -2,9 +2,9 @@
 
 int bc_printA(char *str)
 {
-    printf("\E(0");
+    mt_enter_alt_charset_mode();
     printf("%s", str);
-    printf("\E(B");
+    mt_exit_alt_charset_mode();
 
     return 0;
 }
@@ -14,7 +14,7 @@ int bc_box(int x1, int y1, int x2, int y2)
     if ((x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) || (x2 < x1 || y2 < y1))
     { return -1; }
 
-    printf("\E(0");
+    mt_enter_alt_charset_mode();
 
     for (int i = 0; i < x2 - x1; i++)
     {
@@ -38,7 +38,7 @@ int bc_box(int x1, int y1, int x2, int y2)
             printf("x\n");
         }
     }
-    printf("\E(B");
+    mt_exit_alt_charset_mode();
 
     return 0;
 }
@@ -47,7 +47,7 @@ int bc_printbigchar(int bigchar[2], int x, int y, dye color, dye background)
 {
     if (x < 0 || y < 0) { return -1; }
 
-    printf("\E(0");
+    mt_enter_alt_charset_mode();
 
     for (int i = 0; i < 2; i++)
     {
@@ -69,7 +69,7 @@ int bc_printbigchar(int bigchar[2], int x, int y, dye color, dye background)
             mt_gotoXY(x + i * 4 + byte_of_number + 1, y);
         }
     }
-    printf("\E(B");
+    mt_exit_alt_charset_mode();
 
     return 0;
 }

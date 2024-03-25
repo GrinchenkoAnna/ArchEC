@@ -61,3 +61,6 @@ int mt_resetcolor()
     printf("\E[0m");
     return 0;
 }
+
+void mt_enter_alt_charset_mode() { printf("\E(0"); }
+void mt_exit_alt_charset_mode() { printf("\E(B"); }
