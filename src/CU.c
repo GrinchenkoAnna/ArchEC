@@ -1,7 +1,10 @@
 #include "CU.h"
+#include "myReadkey.c"
 
 int fREAD(int operand)
 {
+    rk_mytermrestore();
+
     mt_printtoterm("Input:< ");
     char buffer[8];
     mt_readfromterm(buffer, sizeof(buffer));
@@ -22,11 +25,14 @@ int fREAD(int operand)
     }
 
     sc_memorySet(operand, value);
+    rk_mytermregime(0, 10, 6, 0, 1);
     return 0;
 }
 
 int fWRITE(int operand)
 {
+    rk_mytermrestore();
+
     int value;
     char buffer[5];
     sc_memoryGet(operand, &value);
@@ -38,6 +44,8 @@ int fWRITE(int operand)
     mt_printtoterm("\nPress any key");
     mt_readfromterm(buffer, sizeof(buffer));
     mt_enter_alt_charset_mode();
+
+    rk_mytermregime(0, 10, 6, 0, 1);
 
     return 0;
 }

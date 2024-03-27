@@ -1,5 +1,5 @@
-#ifndef LIBRARY_H
-#define LIBRARY_H
+#ifndef MYSIMPLECOMPUTER_H
+#define MYSIMPLECOMPUTER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,7 +57,7 @@
 #define ADDCC 75
 #define SUBCC 76
 
-short registr = 0; 
+short registr = 0;
 short instructionCounter = 0;
 int accumulator = 0;
 int sc_memory[MEMORY_SIZE];

@@ -9,15 +9,14 @@ int rk_readkey(enum keys *key)
 
     if (fd_term == -1 || read_input == -1) { return -1; }
 
-    for (int i = read_input - 1; i < BUFFER_SIZE; i++) { buffer[i] = '\0'; }
+    for (int i = read_input; i < BUFFER_SIZE; i++) { buffer[i] = '\0'; }
 
-    if (buffer[0] == '\0') { *key = KEY_enter; }
-    else if (buffer[0] == 'l') { *key = KEY_l; }
-    else if (buffer[0] == 's') { *key = KEY_s; }
-    else if (buffer[0] == 'r') { *key = KEY_r; }
-    else if (buffer[0] == 't') { *key = KEY_t; }
-    else if (buffer[0] == 'i') { *key = KEY_i; }
-    else if (buffer[0] == 'q') { *key = KEY_quit; }
+    if (!strcmp(buffer, "l")) { *key = KEY_l; }
+    else if (!strcmp(buffer, "s")) { *key = KEY_s; }
+    else if (!strcmp(buffer, "r")) { *key = KEY_r; }
+    else if (!strcmp(buffer, "t")) { *key = KEY_t; }
+    else if (!strcmp(buffer, "i")) { *key = KEY_i; }
+    else if (!strcmp(buffer, "q")) { *key = KEY_quit; }
     else if (!strcmp(buffer, "\E[15~") || !strcmp(buffer, "\E[[E")
              || !strcmp(buffer, "^[[15·"))
         { *key = KEY_F5; }
@@ -141,7 +140,7 @@ int rk_mytermregime(int regime, int vtime, int vmin, int echo, int sigint)
         else { return -1; }
     }
 
-    if (tcsetattr(fd_term, TCSANOW, &settings) == -1)
+    if (tcsetattr(fd_term, TCSAFLUSH, &settings) == -1)
     {
         printf("Не удалось применить установленные параметры терминала\n");
         return -1;

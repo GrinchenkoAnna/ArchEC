@@ -10,8 +10,8 @@ DIR_CTEST = ./thirdparty/
 DIR_TEMP = ./src/temp/
 DIR_BIN = ./bin/
 
-LIBRARY = $(DIR_OBJ)library.a
-LIBRARY_TEST = $(DIR_BIN)library_test
+MYSIMPLECOMPUTER = $(DIR_OBJ)mySimpleComputer.a
+MYSIMPLECOMPUTER_TEST = $(DIR_BIN)mySimpleComputer_test
 
 MYTERM = $(DIR_OBJ)myTerm.a
 MYTERM_TEST = $(DIR_BIN)myTerm_test
@@ -33,10 +33,10 @@ ALU = $(DIR_BIN)ALU
 SAT = sat
 SBT = sbt
 
-.PHONY: all library myterm mybchars myreadkey display hdd cu alu sat sbt clean test
+.PHONY: all mySC myterm mybchars myreadkey display hdd cu alu sat sbt clean test
 
-all: library myterm mybchars myreadkey display hdd cu alu sat
-library: $(LIBRARY)
+all: mySC myterm mybchars myreadkey display hdd cu alu sat
+mySC: $(MYSIMPLECOMPUTER)
 myterm: $(MYTERM)
 mybchars: $(MYBIGCHARS)
 myreadkey: $(MYREADKEY)
@@ -44,26 +44,26 @@ display: $(DISPLAY)
 hdd: $(HDD)
 cu: $(CU)
 clean:
-	rm -rf $(LIBRARY) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
+	rm -rf $(MYSIMPLECOMPUTER) $(MYTERM) $(DISPLAY) $(MYBIGCHARS) $(MYREADKEY) \
 	$(HDD) $(DIR_OBJ)/* \
-	$(LIBRARY_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(MYREADKEY_TEST) \
+	$(MYSIMPLECOMPUTER_TEST) $(MYTERM_TEST) $(MYBIGCHARS_TEST) $(MYREADKEY_TEST) \
 	$(HDD_TEST) $(DIR_TEST_OBJ)*.o \
 	$(DIR_TEMP) $(DIR_BIN)* \
 	$(DIR_TEST_SCR)testfile.txt $(DIR_TEST_SCR)testfile_empty.txt \
 	$(DIR_TEST_SRC)*.o sat sbt
-test: test-lib test-myterm test-mybchars test-myreadkey test-hdd
-test-lib: $(LIBRARY_TEST)
+test: test-mySC test-myterm test-mybchars test-myreadkey test-hdd
+test-mySC: $(MYSIMPLECOMPUTER_TEST)
 test-myterm: $(MYTERM_TEST)
 test-mybchars: $(MYBIGCHARS_TEST)
 test-myreadkey: $(MYREADKEY_TEST)
 test-hdd: $(HDD_TEST)
 
 #---создание статических библиотек---
-#library
-$(DIR_OBJ)library.o: $(DIR_SRC)library.c 
+#mySimpleComputer
+$(DIR_OBJ)mySimpleComputer.o: $(DIR_SRC)mySimpleComputer.c
 	$(CC) $(CFLAGS) $< -o $@
 
-$(LIBRARY): $(DIR_OBJ)library.o
+$(MYSIMPLECOMPUTER): $(DIR_OBJ)mySimpleComputer.o
 	ar rcs $@ $^
 
 #myTerm
@@ -118,22 +118,22 @@ $(DIR_OBJ)show_GUI.o: $(DIR_SRC)show_GUI.c
 $(DIR_OBJ)display.o: $(DIR_SRC)display.c
 	$(CC) $(CFLAGS) -lm $< -o $@
 
-$(DISPLAY): $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)myBigChars.a \
+$(DISPLAY): $(DIR_OBJ)myTerm.a $(DIR_OBJ)mySimpleComputer.a $(DIR_OBJ)myBigChars.a \
 $(DIR_OBJ)display.o
-	$(CC) $(DIR_OBJ)myTerm.a $(DIR_OBJ)library.a $(DIR_OBJ)myBigChars.a \
+	$(CC) $(DIR_OBJ)myTerm.a $(DIR_OBJ)mySimpleComputer.a $(DIR_OBJ)myBigChars.a \
 	$(DIR_OBJ)display.o -Wall -Werror -lm -o $(DISPLAY)
 
 #---тесты---
 $(DIR_TEST_OBJ)main.o: $(DIR_TEST_SCR)main.c 
 	$(CC) $(CFLAGS) $< -o $@
 
-#library
-$(DIR_TEST_OBJ)library_test.o: $(DIR_TEST_SCR)library_test.c 
+#mySimpleComputer
+$(DIR_TEST_OBJ)mySimpleComputer_test.o: $(DIR_TEST_SCR)mySimpleComputer_test.c
 	$(CC) -I src $(CFLAGS) $< -o $@
 
-$(LIBRARY_TEST): $(DIR_OBJ)library.a $(DIR_TEST_OBJ)library_test.o \
+$(LIBRARY_TEST): $(DIR_OBJ)mySimpleComputer.a $(DIR_TEST_OBJ)mySimpleComputer_test.o \
 $(DIR_TEST_OBJ)main.o 
-	$(CC) $(DIR_OBJ)library.a $(DIR_TEST_OBJ)library_test.o \
+	$(CC) $(DIR_OBJ)mySimpleComputer.a $(DIR_TEST_OBJ)mySimpleComputer_test.o \
 	$(DIR_TEST_OBJ)main.o -Wall -Werror -o $(LIBRARY_TEST)
 
 #myTerm

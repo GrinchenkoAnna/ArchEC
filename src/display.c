@@ -4,7 +4,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "myReadkey.c"
+//#include "myReadkey.c"
 #include "Signal.c"
 
 void key_convert(enum keys key)
@@ -43,10 +43,6 @@ void key_convert(enum keys key)
 
         case KEY_F6: instructionCounter = sc_memory[instructionCounter]; break;
 
-        case KEY_enter:
-            // убрать?
-            break;
-
         case KEY_default: printf("Unknown command\n"); break;
 
         default: break;
@@ -76,7 +72,7 @@ int main()
     raise(SIGUSR1);
 
     rk_mytermsave();
-    //rk_mytermregime(1, 0, 0, 1, 1);
+    rk_mytermregime(0, 10, 6, 0, 1);
 
     fg_color = WHITE;
     bg_color = BLACK; 
