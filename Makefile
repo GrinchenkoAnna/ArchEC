@@ -129,12 +129,12 @@ $(DIR_TEST_OBJ)main.o: $(DIR_TEST_SCR)main.c
 
 #mySimpleComputer
 $(DIR_TEST_OBJ)mySimpleComputer_test.o: $(DIR_TEST_SCR)mySimpleComputer_test.c
-	$(CC) -I src $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
-$(LIBRARY_TEST): $(DIR_OBJ)mySimpleComputer.a $(DIR_TEST_OBJ)mySimpleComputer_test.o \
-$(DIR_TEST_OBJ)main.o 
+$(MYSIMPLECOMPUTER_TEST): $(DIR_OBJ)mySimpleComputer.a \
+$(DIR_TEST_OBJ)mySimpleComputer_test.o $(DIR_TEST_OBJ)main.o
 	$(CC) $(DIR_OBJ)mySimpleComputer.a $(DIR_TEST_OBJ)mySimpleComputer_test.o \
-	$(DIR_TEST_OBJ)main.o -Wall -Werror -o $(LIBRARY_TEST)
+	$(DIR_TEST_OBJ)main.o -Wall -Werror -o $(MYSIMPLECOMPUTER_TEST)
 
 #myTerm
 $(DIR_TEST_OBJ)main_myTerm.o: $(DIR_TEST_SCR)main_myTerm.c 

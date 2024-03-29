@@ -57,8 +57,16 @@ void create_partition_table(unsigned long long int hdd_size, pt_entry_t *pttable
         a_lba2chs(chs_hdd, pttable[parts].address, &pttable[parts].start_part);
         end = start + part_size;
         a_lba2chs(chs_hdd, end, &pttable[parts].end_part);
-        pttable[parts].sect_total = pttable[parts].end_part.sector - pttable[parts].start_part.sector;
-        if (pttable[parts].sect_total < 0) { pttable[parts].sect_total *= -1; }
+        if (pttable[parts].end_part.sector >= pttable[parts].start_part.sector)
+        {
+            pttable[parts].sect_total = pttable[parts].end_part.sector - pttable[parts].start_part.sector;
+        }
+        else
+        {
+            pttable[parts].sect_total = pttable[parts].start_part.sector - pttable[parts].end_part.sector;
+        }
+
+
 
 enter_os:
         printf("Введите тип ОС (№):\n");

@@ -69,7 +69,7 @@ void check_flags(struct termios term1, struct termios term2)
 int main()
 {
     //rk_mytermregime
-    rk_mytermregime(0, 30, 5, 0, 0);
+    rk_mytermregime(0, 10, 6, 0, 1);
     /* неканонический режим работы
      * ожидание 3 секунды
      * нужно ввести минимум 5 символов
@@ -120,9 +120,6 @@ int main()
 
             case KEY_left:
                 printf("нажата left\n"); break;
-
-            case KEY_enter:
-                printf("нажата enter\n"); break;
 
              case KEY_quit:
                 printf("нажата q. Выход\n"); break;

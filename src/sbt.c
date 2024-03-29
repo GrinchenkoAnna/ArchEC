@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "library.c"
+#include "mySimpleComputer.c"
 
 int pass = 0;
 int* goto_from;
@@ -10,8 +10,8 @@ int* goto_to;
 int goto_index = 0;
 int goto_current = 0;
 
-FILE* factorial_sBasic = NULL;
-FILE* factorial_sAssembler = NULL;
+FILE* sBasic = NULL;
+FILE* sAssembler = NULL;
 
 char variable_name = 'Z'; //всего 26
 
@@ -38,12 +38,6 @@ struct var //вводимые переменные
     int value;
 };
 struct var variables[99];
-
-typedef struct NODE
-{
-    char data;
-    struct NODE* next;
-} node;
 
 typedef struct Node
 {
@@ -165,11 +159,11 @@ void calculate_RPN(int j, char* rpn) //запуталась
     {
         if (rpn[i] >= 'A' && rpn[i] <= 'Z')
         {
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+            fprintf(sAssembler, "%.2d LOAD %d\n",
                         commandCounterSA, getVarAddress(rpn[i]));
             commandCounterSA++;
 
-            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+            fprintf(sAssembler, "%.2d STORE %d\n",
                         commandCounterSA, 99 - varCounter);
             commandCounterSA++;
 
@@ -177,11 +171,11 @@ void calculate_RPN(int j, char* rpn) //запуталась
         }
         else if (rpn[i] >= '0' && rpn[i] <= '9')
         {
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+            fprintf(sAssembler, "%.2d LOAD %d\n",
                         commandCounterSA, getVarAddress(getVarName(rpn[i])));
             commandCounterSA++;
 
-            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+            fprintf(sAssembler, "%.2d STORE %d\n",
                         commandCounterSA, 99 - varCounter);
             commandCounterSA++;
 
@@ -189,32 +183,32 @@ void calculate_RPN(int j, char* rpn) //запуталась
         }
         else
         {
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+            fprintf(sAssembler, "%.2d LOAD %d\n",
                         commandCounterSA, 99 - varCounter + 1);
             commandCounterSA++;
 
             switch (rpn[i])
             {
             case '+':
-                fprintf(factorial_sAssembler, "%.2d ADD %d\n",
+                fprintf(sAssembler, "%.2d ADD %d\n",
                         commandCounterSA, 99 - varCounter + 2);
                 commandCounterSA++;
                 break;
 
             case '-':
-                fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+                fprintf(sAssembler, "%.2d SUB %d\n",
                         commandCounterSA, 99 - varCounter + 2);
                 commandCounterSA++;
                 break;
 
             case '*':
-                fprintf(factorial_sAssembler, "%.2d MUL %d\n",
+                fprintf(sAssembler, "%.2d MUL %d\n",
                         commandCounterSA, 99 - varCounter + 2);
                 commandCounterSA++;
                 break;
 
             case '/':
-                fprintf(factorial_sAssembler, "%.2d DIVIDE %d\n",
+                fprintf(sAssembler, "%.2d DIVIDE %d\n",
                         commandCounterSA, 99 - varCounter + 2);
                 commandCounterSA++;
                 break;
@@ -224,8 +218,8 @@ void calculate_RPN(int j, char* rpn) //запуталась
                 exit(EXIT_FAILURE);
             }
 
-            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
-                        commandCounterSA, 99 - varCounter + 2);
+            fprintf(sAssembler, "%.2d STORE %d\n",
+                    commandCounterSA, 99 - varCounter + 2);
             commandCounterSA++;
             varCounter--;
         }
@@ -233,17 +227,16 @@ void calculate_RPN(int j, char* rpn) //запуталась
     }
 }
 
-void load_program_factorial(const char* factorial_filename_sBasic,
-                            const char* factorial_filename_sAssembler)
+void load_program(const char* filename_sBasic, const char* filename_sAssembler)
 {
-    if ((factorial_sBasic = fopen(factorial_filename_sBasic, "r")) == NULL)
+    if ((sBasic = fopen(filename_sBasic, "r")) == NULL)
     {
-        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n", factorial_filename_sBasic);
+        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n", filename_sBasic);
         exit(EXIT_FAILURE);
     }
-    if ((factorial_sAssembler = fopen (factorial_filename_sAssembler, "w")) == NULL)
+    if ((sAssembler = fopen (filename_sAssembler, "w")) == NULL)
     {
-        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n", factorial_filename_sAssembler);
+        fprintf(stderr, "%s cannot be found or opened. Translation breaked\n", filename_sAssembler);
         exit(EXIT_FAILURE);
     }
 }
@@ -267,7 +260,7 @@ char getVarName (int value) //создать новую переменную, з
             exit(EXIT_FAILURE);
         }
         variables[varCounter].value = value;
-        fprintf(factorial_sAssembler, "%.2d = +%.4d\n",
+        fprintf(sAssembler, "%.2d = +%.4d\n",
                 variables[varCounter].address, variables[varCounter].value);
     }
     else
@@ -344,7 +337,7 @@ void INPUT(int i, char* args) // -> READ - Ввод с терминала в у�
         }
     }
 
-    fprintf(factorial_sAssembler, "%.2d READ %d\n",
+    fprintf(sAssembler, "%.2d READ %d\n",
                 commandCounterSA, getVarAddress(args[0]));
     commandCounterSA++;
 }
@@ -363,7 +356,7 @@ void PRINT(int i, char* args) // -> WRITE - Вывод на терминал з�
         }
     }
 
-    fprintf(factorial_sAssembler, "%.2d WRITE %d\n",
+    fprintf(sAssembler, "%.2d WRITE %d\n",
             commandCounterSA, getVarAddress(args[0]));
     commandCounterSA++;
 }
@@ -384,17 +377,17 @@ void GOTO(int i, char option, int number_of_command) //-> JUMP - Переход 
         {
         case '<':
         case '>':
-            fprintf(factorial_sAssembler, "%.2d JNEG %d\n",
+            fprintf(sAssembler, "%.2d JNEG %d\n",
                     commandCounterSA, goto_to[goto_current]);
             break;
 
         case '=':
-            fprintf(factorial_sAssembler, "%.2d JZ %d\n",
+            fprintf(sAssembler, "%.2d JZ %d\n",
                     commandCounterSA, goto_to[goto_current]);
             break;
 
         case '0':
-            fprintf(factorial_sAssembler, "%.2d JUMP %d\n",
+            fprintf(sAssembler, "%.2d JUMP %d\n",
                     commandCounterSA, goto_to[goto_current]);
             break;
 
@@ -491,10 +484,10 @@ void LET(int i, char* args)
         }
         if (op1[1] == '\n')
         {
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
-                        commandCounterSA, getVarAddress(op1[0]));
-            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
-                        commandCounterSA, getVarAddress(variable[0]));
+            fprintf(sAssembler, "%.2d LOAD %d\n",
+                    commandCounterSA, getVarAddress(op1[0]));
+            fprintf(sAssembler, "%.2d STORE %d\n",
+                    commandCounterSA, getVarAddress(variable[0]));
             commandCounterSA++;
             return;
         }
@@ -535,7 +528,7 @@ void LET(int i, char* args)
             //обработка выражения
             if (pass)
             {
-                fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+                fprintf(sAssembler, "%.2d LOAD %d\n",
                         commandCounterSA, getVarAddress(op1[0]));
             }
             commandCounterSA++;
@@ -543,22 +536,22 @@ void LET(int i, char* args)
             switch (sign_of_operator)
             {
             case '+':
-                fprintf(factorial_sAssembler, "%.2d ADD %d\n",
+                fprintf(sAssembler, "%.2d ADD %d\n",
                         commandCounterSA, getVarAddress(op2[0]));
                 break;
 
             case '-':
-                fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+                fprintf(sAssembler, "%.2d SUB %d\n",
                             commandCounterSA, getVarAddress(op2[0]));
                 break;
 
             case '*':
-                fprintf(factorial_sAssembler, "%.2d MUL %d\n",
+                fprintf(sAssembler, "%.2d MUL %d\n",
                             commandCounterSA, getVarAddress(op2[0]));
                 break;
 
             case '/':
-                fprintf(factorial_sAssembler, "%.2d DIVIDE %d\n",
+                fprintf(sAssembler, "%.2d DIVIDE %d\n",
                             commandCounterSA, getVarAddress(op2[0]));
                 break;
 
@@ -569,7 +562,7 @@ void LET(int i, char* args)
             }
             commandCounterSA++;
 
-            fprintf(factorial_sAssembler, "%.2d STORE %d\n",
+            fprintf(sAssembler, "%.2d STORE %d\n",
                     commandCounterSA, getVarAddress(variable[0]));
             commandCounterSA++;
         }
@@ -577,7 +570,7 @@ void LET(int i, char* args)
     //число
     else if (atoi(assignment_part) != 0 && (assignment_part[0] >= '0' && assignment_part[0] <= '9') && complicated < 2)
     {
-        fprintf(factorial_sAssembler, "%.2d = +%.4d\n",
+        fprintf(sAssembler, "%.2d = +%.4d\n",
                 getVarAddress(variable[0]), atoi(assignment_part));
     }
     //выражение со скобками
@@ -604,10 +597,6 @@ void IF(int i, char *args)
     int spaces = 2; //считает пробелы для обработки строк
 
     char sign[4] = { '>', '=', '<', ' ' };
-
-    // ******************* //
-    // БЕЗ СКОБОК!!! Добавить
-    // ******************* //
 
     char expression[strlen(args) + 1];
     strcpy(expression, args);
@@ -689,9 +678,9 @@ void IF(int i, char *args)
         switch (sign_of_comparision)
         {
         case '<':
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+            fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
-            fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+            fprintf(sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
             commandCounterSA++;
             commandCounterSA++;
@@ -699,9 +688,9 @@ void IF(int i, char *args)
             break;
 
         case '>':
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+            fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
-            fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+            fprintf(sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
             commandCounterSA++;
             commandCounterSA++;
@@ -709,9 +698,9 @@ void IF(int i, char *args)
             break;
 
         case '=':
-            fprintf(factorial_sAssembler, "%.2d LOAD %d\n",
+            fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
-            fprintf(factorial_sAssembler, "%.2d SUB %d\n",
+            fprintf(sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
             commandCounterSA++;
             commandCounterSA++;
@@ -728,21 +717,19 @@ void IF(int i, char *args)
     else { LET(i, result); }
 }
 
-void END() { fprintf(factorial_sAssembler, "%.2i HALT 00\n", commandCounterSA); }
+void END() { fprintf(sAssembler, "%.2i HALT 00\n", commandCounterSA); }
 
 void translate_basic_to_assembler()
 {
-    //instructionCounter = 0;
     char line[128];
     while (1) //подсчет команд = кол-ва строк в файле
     {
-        if (feof(factorial_sBasic)) { break; }
-        fgets(line, 127, factorial_sBasic);
+        if (feof(sBasic)) { break; }
+        fgets(line, 127, sBasic);
         commandCounterSB++;
     }
-    //commandCounterSB = instructionCounter;
 
-    fseek(factorial_sBasic, 0, SEEK_SET);
+    fseek(sBasic, 0, SEEK_SET);
 
     program = (struct command*)malloc(sizeof(struct command)*commandCounterSB);
     for (int i = 0; i < commandCounterSB; i++)
@@ -754,9 +741,9 @@ void translate_basic_to_assembler()
             exit(EXIT_FAILURE);
         }
 
-        if (fgets(program[i].instruction, 127, factorial_sBasic) == NULL) //чтение в структуру
+        if (fgets(program[i].instruction, 127, sBasic) == NULL) //чтение в структуру
         {
-            if (feof(factorial_sBasic)) { break; }
+            if (feof(sBasic)) { break; }
             fprintf(stderr, "line %d of programm cannot be read. Translation breaked\n", i++);
             exit(EXIT_FAILURE);
         }
@@ -805,16 +792,16 @@ void translate_basic_to_assembler()
     varCounter = -1;
     commandCounterSA = 0;
 
-    fseek(factorial_sBasic, 0, SEEK_SET);
-    fseek(factorial_sAssembler, 0, SEEK_SET);
+    fseek(sBasic, 0, SEEK_SET);
+    fseek(sAssembler, 0, SEEK_SET);
 
     program = (struct command*)malloc(sizeof(struct command)*commandCounterSB);
     for (int i = 0; i < commandCounterSB; i++)
     {
 
-        if (fgets(program[i].instruction, 127, factorial_sBasic) == NULL) //чтение в структуру
+        if (fgets(program[i].instruction, 127, sBasic) == NULL) //чтение в структуру
         {
-            if (feof(factorial_sBasic)) { break; }
+            if (feof(sBasic)) { break; }
         }
 
         program[i].address = commandCounterSA;
@@ -850,7 +837,7 @@ int main (int argc, const char** argv)
         exit(EXIT_FAILURE);
     }
 
-    load_program_factorial(argv[1], argv[2]); // factorial.sb, factorial.sa
+    load_program(argv[1], argv[2]); // file.sb, file.sa
     translate_basic_to_assembler();
 
     return 0;
