@@ -7,6 +7,8 @@
 //#include "myReadkey.c"
 #include "Signal.c"
 
+char buffer[128];
+
 void key_convert(enum keys key)
 {
     int ignoring_clock_pulses;
@@ -15,9 +17,46 @@ void key_convert(enum keys key)
     {
         switch (key)
         {
-        case KEY_l: sc_memoryLoad(filename); break;
+        case KEY_l:
+            rk_mytermrestore();
+            mt_printtoterm("Filename:< ");
 
-        case KEY_s: sc_memorySave(filename); break;
+            for (int i = 0; i < strlen(buffer); i++)
+            { if (buffer[i] == '\n') { buffer[i] = '\0'; } }
+            if (sc_memoryLoad(buffer) == -1)
+            {
+                mt_printtoterm("Cannot load file. Press ane key\n");
+                mt_readfromterm(buffer, sizeof(buffer));
+            }
+            else
+            {
+                mt_printtoterm("File loaded. Press ane key\n");
+                mt_readfromterm(buffer, sizeof(buffer));
+            }
+
+            rk_mytermregime(0, 10, 6, 0, 1); break;
+
+
+        case KEY_s:
+            rk_mytermrestore();
+            mt_printtoterm("Filename:> ");
+
+            mt_readfromterm(buffer, sizeof(buffer));
+            for (int i = 0; i < strlen(buffer); i++)
+            { if (buffer[i] == '\n') { buffer[i] = '\0'; } }
+            if (sc_memorySave(buffer) == -1)
+            {
+                mt_printtoterm("Cannot save file. Press ane key\n");
+                mt_readfromterm(buffer, sizeof(buffer));
+            }
+            else
+            {
+                mt_printtoterm("File saved. Press ane key\n");
+                mt_readfromterm(buffer, sizeof(buffer));
+            }
+            sc_memorySave(buffer);
+
+            rk_mytermregime(0, 10, 6, 0, 1); break;
 
         case KEY_up:
             if (instructionCounter - 10 >= 0) { instructionCounter -= 10; }

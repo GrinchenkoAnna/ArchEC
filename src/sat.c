@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "library.c"
+#include "mySimpleComputer.c"
 
 FILE* factorial_sAssembler = NULL;
 

@@ -328,13 +328,12 @@ void INPUT(int i, char* args) // -> READ - Ввод с терминала в у�
     if (!(args[0] >= 'A' && args[0] <= 'Z'))
     {
         fprintf(stderr, "INPUT: line %d: %s cannot be a variable name. Translation breaked\n", i, args);
-        exit(EXIT_FAILURE);
 
         if (strlen(args) != 1)
         {
             fprintf(stderr, "INPUT: line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i,  args);
-            exit(EXIT_FAILURE);
         }
+        exit(EXIT_FAILURE);
     }
 
     fprintf(sAssembler, "%.2d READ %d\n",
@@ -347,13 +346,12 @@ void PRINT(int i, char* args) // -> WRITE - Вывод на терминал з�
     if (!(args[0] >= 'A' && args[0] <= 'Z'))
     {
         fprintf(stderr, "PRINT: line %d: %s cannot be a variable name. Translation breaked\n", i, args);
-        exit(EXIT_FAILURE);
 
         if (strlen(args) != 1)
         {
             fprintf(stderr, "PRINT: line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i,  args);
-            exit(EXIT_FAILURE);
         }
+        exit(EXIT_FAILURE);
     }
 
     fprintf(sAssembler, "%.2d WRITE %d\n",
@@ -424,13 +422,12 @@ void LET(int i, char* args)
     if (!(variable[0] >= 'A' && variable[0] <= 'Z'))
     {
         fprintf(stderr, "LET: line %d: %s cannot be a variable name. Translation breaked\n", i, variable);
-        exit(EXIT_FAILURE);
 
         if (strlen(variable) != 1)
         {
             fprintf(stderr, "LET: line %d: a string variable name %s cannot contains more than 1 symbol. Translation breaked\n", i, variable);
-            exit(EXIT_FAILURE);
         }
+        exit(EXIT_FAILURE);
     }
     getVarValue(variable[0]);
 
@@ -486,6 +483,7 @@ void LET(int i, char* args)
         {
             fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
+            commandCounterSA++;
             fprintf(sAssembler, "%.2d STORE %d\n",
                     commandCounterSA, getVarAddress(variable[0]));
             commandCounterSA++;
@@ -680,9 +678,9 @@ void IF(int i, char *args)
         case '<':
             fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
+            commandCounterSA++;
             fprintf(sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
-            commandCounterSA++;
             commandCounterSA++;
             GOTO(i, '<', atoi(result));
             break;
@@ -690,9 +688,9 @@ void IF(int i, char *args)
         case '>':
             fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
+            commandCounterSA++;
             fprintf(sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
-            commandCounterSA++;
             commandCounterSA++;
             GOTO(i, '>', atoi(result));
             break;
@@ -700,9 +698,9 @@ void IF(int i, char *args)
         case '=':
             fprintf(sAssembler, "%.2d LOAD %d\n",
                     commandCounterSA, getVarAddress(op1[0]));
+            commandCounterSA++;
             fprintf(sAssembler, "%.2d SUB %d\n",
                     commandCounterSA, getVarAddress(op2[0]));
-            commandCounterSA++;
             commandCounterSA++;
             GOTO(i, '=', atoi(result));
             break;
