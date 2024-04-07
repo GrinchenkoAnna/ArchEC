@@ -21,20 +21,21 @@ void key_convert(enum keys key)
             rk_mytermrestore();
             mt_printtoterm("Filename:< ");
 
+            mt_readfromterm(buffer, sizeof(buffer));
             for (int i = 0; i < strlen(buffer); i++)
             { if (buffer[i] == '\n') { buffer[i] = '\0'; } }
             if (sc_memoryLoad(buffer) == -1)
             {
-                mt_printtoterm("Cannot load file. Press ane key\n");
+                mt_printtoterm("Cannot load file. Press any key\n");
                 mt_readfromterm(buffer, sizeof(buffer));
             }
             else
             {
-                mt_printtoterm("File loaded. Press ane key\n");
+                mt_printtoterm("File loaded. Press any key\n");
                 mt_readfromterm(buffer, sizeof(buffer));
             }
 
-            rk_mytermregime(0, 10, 6, 0, 1); break;
+            rk_mytermregime(0, 5, 6, 0, 1); break;
 
 
         case KEY_s:
@@ -46,17 +47,17 @@ void key_convert(enum keys key)
             { if (buffer[i] == '\n') { buffer[i] = '\0'; } }
             if (sc_memorySave(buffer) == -1)
             {
-                mt_printtoterm("Cannot save file. Press ane key\n");
+                mt_printtoterm("Cannot save file. Press any key\n");
                 mt_readfromterm(buffer, sizeof(buffer));
             }
             else
             {
-                mt_printtoterm("File saved. Press ane key\n");
+                mt_printtoterm("File saved. Press any key\n");
                 mt_readfromterm(buffer, sizeof(buffer));
             }
             sc_memorySave(buffer);
 
-            rk_mytermregime(0, 10, 6, 0, 1); break;
+            rk_mytermregime(0, 5, 6, 0, 1); break;
 
         case KEY_up:
             if (instructionCounter - 10 >= 0) { instructionCounter -= 10; }
@@ -111,7 +112,7 @@ int main()
     raise(SIGUSR1);
 
     rk_mytermsave();
-    rk_mytermregime(0, 10, 6, 0, 1);
+    rk_mytermregime(0, 5, 6, 0, 1);
 
     fg_color = WHITE;
     bg_color = BLACK; 
